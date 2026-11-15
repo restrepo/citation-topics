@@ -23,7 +23,7 @@ from pathlib import Path
 import numpy as np
 
 from .cluster import topic_links
-from .io import Fields, as_year, iter_works
+from .io import Fields, as_list, as_year, iter_works
 from .layout import work_positions
 from .run import load
 
@@ -133,6 +133,9 @@ def export_works_vosviewer(input, out, fields=None, highlight=None, highlight_la
         url = fields.get(w, "url")
         t = int(c["topic"][i])
         lines = [f"<b>{_html(title)}</b>"]
+        authors = _authors(fields, w)
+        if authors:
+            lines.append(_html(authors))
         if t >= 0:
             lines.append(_html(tname.get(t, f"Topic {t}")))
         lines.append(
@@ -193,6 +196,22 @@ def export_works_vosviewer(input, out, fields=None, highlight=None, highlight_la
     path.write_text(json.dumps(vos, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     log(f"VOSviewer: {len(items):,} works, {len(a):,} links -> {path}")
     return path
+
+
+def _authors(fields, w, show=3):
+    """Short author line of a work: up to `show` names, et al., the collaboration and the author count (from the
+    optional fields authors, author_count and collaborations); None when the work has none of them."""
+    names = [str(x) for x in as_list(fields.get(w, "authors")) if isinstance(x, (str, int))]
+    count = w.get("author_count")
+    count = int(count) if isinstance(count, (int, float)) and count > 0 else len(names)
+    collab = [str(x) for x in as_list(w.get("collaborations")) if x]
+    line = "; ".join(names[:show]) + (" et al." if count > show and names else "")
+    if collab:
+        c = ", ".join(x if "ollaboration" in x else f"{x} Collaboration" for x in collab)
+        line = f"{c}: {line}" if line else c
+    if count > show:
+        line += f" ({count:,} authors)"
+    return line or None
 
 
 def _html(s):

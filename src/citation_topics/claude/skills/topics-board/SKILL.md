@@ -20,7 +20,7 @@ its data inside it, that opens in any browser (it loads d3 from cdnjs). Send or 
 | Overview: headline figures, map of topics, table of topics | always |
 | Timeline: works per topic and year | the input has `year` |
 | Works: search titles, filter by topic, most cited first | the input has `title` |
-| Network: every work with a citation link, each topic a labelled cluster, coloured by area; zoom, hover, click to open | at most `--network-max` works (10,000; 0 turns it off) |
+| Network: every work with a citation link, each topic a labelled cluster, coloured by area; zoom, hover; a click shows only that work's citation links and a card with its authors and link | at most `--network-max` works (10,000; 0 turns it off) |
 | Highlight (named by `--highlight-label`) | `--highlight FIELD` and some works have FIELD true |
 | Countries: share of each topic's works by country | the input has `countries` |
 | Authors: authors with most works per topic | the input has `authors` |
