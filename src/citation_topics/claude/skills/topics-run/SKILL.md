@@ -70,6 +70,7 @@ sizes, years and links; say so, and name only if the user can supply what a topi
 
 ```bash
 citation-topics export OUT/            # topics_vosviewer.json, topics_map.txt, topics_network.txt, CSVs
+citation-topics export OUT/ --works INPUT   # also works_vosviewer.json, the network of works (up to 10,000)
 ```
 
 `topics_vosviewer.json` opens in VOSviewer Online: `https://app.vosviewer.com/?json=URL` with a public URL of

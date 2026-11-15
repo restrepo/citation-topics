@@ -33,8 +33,9 @@ def test_cli_end_to_end(works_file, tmp_path):
     names = tmp_path / "names.json"
     names.write_text(json.dumps({"topics": {"0": "A"}}))
     assert main(["names", str(out), str(names), "-q"]) == 0
-    assert main(["export", str(out), "-q"]) == 0
+    assert main(["export", str(out), "--works", str(works_file), "-q"]) == 0
     assert (out / "topics_vosviewer.json").exists() and (out / "topics.csv").exists()
+    assert (out / "works_vosviewer.json").exists()
     assert main(["board", str(works_file), str(out), "--title", "T", "-q"]) == 0
     assert "<title>T</title>" in (out / "board.html").read_text()
     assert main(["run", str(works_file), str(tmp_path / "old"), "--to-year", "2009", *args]) == 0

@@ -72,6 +72,12 @@ dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 
 dt { color: var(--muted); }
 dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
 footer { color: var(--muted); font-size: 12px; }
+.net { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; touch-action: none; }
+.net canvas { display: block; width: 100%; cursor: grab; }
+.net canvas:active { cursor: grabbing; }
+.ctl a { font-size: 14px; color: var(--accent); }
+.ctl label { display: inline-flex; gap: 6px; align-items: center; font-size: 14px; color: var(--muted); }
+.ctl button { font: inherit; font-size: 14px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--fg); cursor: pointer; }
 </style>
 </head>
 <body>
@@ -115,6 +121,21 @@ footer { color: var(--muted); font-size: 12px; }
       </div>
       <div class="tw"><table><thead><tr><th class="n">Year</th><th>Title</th><th class="n">Citations</th><th>Topic</th><th>Second topic</th></tr></thead><tbody id="w-body"></tbody></table></div>
       <p class="note" id="w-limit"></p>
+    </div>
+  </section>
+
+  <section class="panel" id="p-network" role="tabpanel" hidden>
+    <div class="sec">
+      <h2>Network of works</h2>
+      <p class="note" id="n-note"></p>
+      <div class="ctl">
+        <select id="n-topic" aria-label="Emphasize a topic"></select>
+        <label><input type="checkbox" id="n-links" checked> Citation links</label>
+        <button type="button" id="n-reset">Reset zoom</button>
+        <a id="n-vos" target="_blank" rel="noopener" hidden>Open in VOSviewer Online</a>
+      </div>
+      <div class="legend" id="n-legend"></div>
+      <div class="net" id="net"><canvas id="n-canvas" role="img"></canvas></div>
     </div>
   </section>
 
@@ -168,7 +189,7 @@ const el = (tag, attrs = {}, ...kids) => {
   for (const c of kids) e.append(c instanceof Node ? c : document.createTextNode(c ?? ''));
   return e;
 };
-const TABS = {overview: 'Overview', timeline: 'Timeline', works: 'Works', highlight: M.highlight_label, countries: 'Countries',
+const TABS = {overview: 'Overview', timeline: 'Timeline', works: 'Works', network: 'Network', highlight: M.highlight_label, countries: 'Countries',
   authors: 'Authors', about: 'About'};
 
 document.getElementById('h-title').textContent = M.title;
@@ -382,13 +403,108 @@ function drawAbout() {
   dl.replaceChildren(...items.flatMap(([k, x]) => [el('dt', {}, k), el('dd', {}, x)]));
 }
 
-const DRAW = {overview: () => { drawMap(); drawTopics(); }, timeline: drawTimeline, works: drawWorks, highlight: drawHighlight,
+/* network */
+let NET = null;
+function drawNetwork() {
+  const N = D.network, box = document.getElementById('net'), cv = document.getElementById('n-canvas');
+  if (!NET) {
+    const nodes = N.nodes.map(([x, y, k, c, yr, f, ti, url]) => ({x, y, k, c, yr, f, ti, url}));
+    const L = N.links, area = new Map(D.topics.map((t) => [t.topic, t.area]));
+    const areas = d3.rollups(D.topics, (v) => v[0].area_name, (t) => t.area).sort((a, b) => a[0] - b[0]);
+    document.getElementById('n-legend').replaceChildren(...areas.map(([a, n]) => el('span', {}, (() => { const d = el('i', {class: 'dot'}); d.style.background = AREA(a); return d; })(), n)),
+      ...(M.highlighted ? [el('span', {}, (() => { const d = el('i', {class: 'dot'}); d.style.background = 'transparent'; d.style.boxShadow = 'inset 0 0 0 2px var(--fg)'; return d; })(), M.highlight_label)] : []));
+    document.getElementById('n-note').textContent = `Each dot is one of the ${fmt(nodes.length)} works with a citation link, sized by its citations and coloured by its area; `
+      + `${fmt(L.length / 2)} lines are the citation links. Each cluster holds the works of one topic, laid out by the links among them and labelled with the topic's name; clusters with more links between them sit closer`
+      + `${M.highlighted ? `; ringed dots are ${M.highlight_label.toLowerCase()}` : ''}. Scroll or pinch to zoom, drag to move, point at a dot for the work, click it to open it.`;
+    if (M.vosviewer) { const a = document.getElementById('n-vos'); a.href = M.vosviewer; a.hidden = false; }
+    const sel = document.getElementById('n-topic');
+    sel.replaceChildren(el('option', {value: ''}, 'All topics'), ...D.topics.map((t) => el('option', {value: t.topic}, `${t.topic}. ${t.name}`)));
+    NET = {nodes, L, area, focus: null, hover: null, k: d3.zoomIdentity};
+    sel.onchange = () => { NET.focus = sel.value === '' ? null : +sel.value; NET.paint(); };
+    document.getElementById('n-links').onchange = () => NET.paint();
+    document.getElementById('n-reset').onclick = () => d3.select(cv).transition().duration(300).call(NET.zoom.transform, d3.zoomIdentity);
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => NET.paint());
+  }
+  const W = Math.max(300, box.clientWidth), H = W < 600 ? 440 : 640, dpr = devicePixelRatio || 1;
+  cv.width = W * dpr; cv.height = H * dpr; cv.style.height = `${H}px`;
+  cv.setAttribute('aria-label', `Network of ${NET.nodes.length} works in ${D.topics.length} topics`);
+  const pad = 24, top = 44, s = Math.min((W - 2 * pad) / 1000, (H - pad - top) / 1000), ox = (W - 1000 * s) / 2, oy = top + (H - pad - top - 1000 * s) / 2;
+  const nodes = NET.nodes, L = NET.L, ctx = cv.getContext('2d');
+  for (const d of nodes) { d.bx = ox + d.x * s; d.by = oy + d.y * s; d.r = 1.6 + 0.9 * Math.log10(1 + d.c); }
+  const labels = N.labels.map(([k, x, y, y2]) => ({k, x: ox + x * s, y: oy + y * s, y2: oy + y2 * s, name: tname(k), works: (byTopic.get(k) || {}).works || 0}))
+    .sort((a, b) => b.works - a.works);
+  const qt = d3.quadtree(nodes, (d) => d.bx, (d) => d.by);
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  NET.paint = () => {
+    const t = NET.k, z = Math.sqrt(t.k), col = {}, line = css('--line'), fg = css('--fg'), panel = css('--panel');
+    for (let a = 0; a < 8; a++) col[a] = css(`--a${a}`);
+    const color = (d) => (d.k == null ? css('--muted') : col[NET.area.get(d.k) % 8]);
+    const on = (d) => NET.focus == null || d.k === NET.focus;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    ctx.save(); ctx.translate(t.x, t.y); ctx.scale(t.k, t.k);
+    if (document.getElementById('n-links').checked) {
+      ctx.lineWidth = 0.5 / t.k; ctx.strokeStyle = line; ctx.globalAlpha = NET.focus == null ? 0.55 : 0.25;
+      ctx.beginPath();
+      for (let i = 0; i < L.length; i += 2) { const a = nodes[L[i]], b = nodes[L[i + 1]]; ctx.moveTo(a.bx, a.by); ctx.lineTo(b.bx, b.by); }
+      ctx.stroke();
+      if (NET.focus != null) {
+        ctx.globalAlpha = 0.6; ctx.strokeStyle = col[NET.area.get(NET.focus) % 8]; ctx.beginPath();
+        for (let i = 0; i < L.length; i += 2) { const a = nodes[L[i]], b = nodes[L[i + 1]]; if (a.k === NET.focus && b.k === NET.focus) { ctx.moveTo(a.bx, a.by); ctx.lineTo(b.bx, b.by); } }
+        ctx.stroke();
+      }
+    }
+    for (const pass of [0, 1]) for (const d of nodes) {
+      if ((pass === 1) !== on(d)) continue;
+      ctx.globalAlpha = on(d) ? 0.9 : 0.12; ctx.fillStyle = color(d);
+      ctx.beginPath(); ctx.arc(d.bx, d.by, d.r / z, 0, 2 * Math.PI); ctx.fill();
+      if (d.f && on(d)) { ctx.globalAlpha = 1; ctx.lineWidth = 1.4 / t.k; ctx.strokeStyle = fg; ctx.stroke(); }
+    }
+    if (NET.hover) { const d = NET.hover; ctx.globalAlpha = 1; ctx.lineWidth = 2 / t.k; ctx.strokeStyle = fg; ctx.beginPath(); ctx.arc(d.bx, d.by, d.r / z + 2 / t.k, 0, 2 * Math.PI); ctx.stroke(); }
+    ctx.restore();
+    ctx.globalAlpha = 1; ctx.font = `600 ${W < 600 ? 11 : 12}px ${css('--sans')}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.lineJoin = 'round'; ctx.lineWidth = 4; ctx.strokeStyle = panel; ctx.fillStyle = fg;
+    const placed = [], max = W < 600 ? 22 : 34;
+    for (const l of labels) {
+      if (NET.focus != null && l.k !== NET.focus) continue;
+      const x = t.applyX(l.x);
+      const words = l.name.split(' '), lines = [''];
+      for (const w of words) { const c = lines[lines.length - 1]; if (c && (c + ' ' + w).length > max) lines.push(w); else lines[lines.length - 1] = c ? c + ' ' + w : w; }
+      const h = 15 * lines.length, w = Math.max(...lines.map((s2) => ctx.measureText(s2).width));
+      const spot = [t.applyY(l.y) - h / 2 - 3, t.applyY(l.y2) + h / 2 + 3].map((y) => [y, [x - w / 2 - 2, y - h / 2 - 2, x + w / 2 + 2, y + h / 2 + 2]])
+        .find(([y, b2]) => x >= 0 && x <= W && y >= 0 && y <= H && !placed.some((b) => b[0] < b2[2] && b2[0] < b[2] && b[1] < b2[3] && b2[1] < b[3]));
+      if (!spot) continue;
+      const [y, box2] = spot;
+      placed.push(box2);
+      lines.forEach((s2, i) => { const yy = y - h / 2 + 7.5 + 15 * i; ctx.strokeText(s2, x, yy); ctx.fillText(s2, x, yy); });
+    }
+  };
+  const tp = NET.tip || (NET.tip = tip(box));
+  NET.zoom = d3.zoom().scaleExtent([0.5, 24]).on('zoom', (ev) => { NET.k = ev.transform; tp.hide(); NET.paint(); });
+  const pick = (ev) => {
+    const [mx, my] = d3.pointer(ev, cv), [x, y] = NET.k.invert([mx, my]);
+    const d = qt.find(x, y, 12 / NET.k.k);
+    return d && (NET.focus == null || d.k === NET.focus) ? d : null;
+  };
+  d3.select(cv).call(NET.zoom).on('dblclick.zoom', null).call(NET.zoom.transform, NET.k)
+    .on('pointermove', (ev) => {
+      const d = pick(ev);
+      if (d !== NET.hover) { NET.hover = d; NET.paint(); }
+      cv.style.cursor = d ? (d.url ? 'pointer' : 'default') : '';
+      if (d) tp.show(ev, [[d.ti || 'Untitled'], [`${d.yr ?? ''}${d.yr ? ' · ' : ''}${fmt(d.c)} citations${d.f ? ` · ${M.highlight_label}` : ''}`, 'm'], [tname(d.k)]]);
+      else tp.hide();
+    })
+    .on('pointerleave', () => { NET.hover = null; tp.hide(); NET.paint(); })
+    .on('click', (ev) => { const d = pick(ev); if (d && d.url) window.open(d.url, '_blank', 'noopener'); });
+  NET.paint();
+}
+
+const DRAW = {overview: () => { drawMap(); drawTopics(); }, timeline: drawTimeline, works: drawWorks, network: drawNetwork, highlight: drawHighlight,
   countries: drawCountries, authors: drawAuthors, about: drawAbout};
 const start = (location.hash || '').slice(1);
 open(M.tabs.includes(start) ? start : 'overview');
 let rw;
 addEventListener('resize', () => { clearTimeout(rw); rw = setTimeout(() => {
-  if (current === 'overview') drawMap(); else if (['timeline', 'countries'].includes(current)) DRAW[current]();
+  if (current === 'overview') drawMap(); else if (current === 'network') drawNetwork(); else if (['timeline', 'countries'].includes(current)) DRAW[current]();
 }, 200); });
 </script>
 </body>

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>citation-topics</title>
+<!-- Home of the GitHub Pages site, published by .github/workflows/pages.yml (copy of docs/). -->
+<style>
+:root { color-scheme: light dark; --fg: #1f1e1d; --muted: #6b6966; --bg: #faf9f5; --panel: #fff; --line: #e3e0d8; --accent: #3266ad; }
+@media (prefers-color-scheme: dark) { :root { --fg: #ecebe7; --muted: #a6a39c; --bg: #1c1b19; --panel: #262523; --line: #3a3936; --accent: #6f9be0; } }
+html { background: var(--bg); }
+body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--fg); background: var(--bg); line-height: 1.55; }
+main { max-width: 46rem; margin: 0 auto; padding: 32px 16px 64px; }
+h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: 30px; line-height: 1.2; margin: 0 0 8px; }
+h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: 22px; margin: 36px 0 8px; }
+p, li { max-width: 70ch; }
+.lede { color: var(--muted); }
+a { color: var(--accent); }
+pre { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; overflow-x: auto; font-size: 13px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin: 18px 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; text-decoration: none; color: var(--fg); display: grid; gap: 4px; }
+.card b { color: var(--accent); }
+.card span { color: var(--muted); font-size: 14px; }
+.card:hover { border-color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+<h1>citation-topics</h1>
+<p class="lede">Research topics and broad areas for any list of works (papers, theses, projects, patents) from their
+citation links, with Leiden clustering of the direct-citation network as CWTS does for the OpenAlex topics; a board
+to explore them, and Claude skills that name them.</p>
+
+<div class="cards">
+  <a class="card" href="leiden.html"><b>How the topics are made</b><span>The Leiden algorithm explained step by step, and what the package does exactly.</span></a>
+  <a class="card" href="examples/inspire-991924/"><b>Sample board</b><span>The citation community of INSPIRE-HEP author 991924: 1,967 works in 11 topics.</span></a>
+  <a class="card" href="https://app.vosviewer.com/?json=https%3A%2F%2Frestrepo.github.io%2Fcitation-topics%2Fexamples%2Finspire-991924%2Fworks_vosviewer.json"><b>Sample in VOSviewer Online</b><span>The same network of works, one cluster per topic.</span></a>
+</div>
+
+<h2>The sample</h2>
+<p>The papers of the INSPIRE-HEP author <a href="https://inspirehep.net/authors/991924">991924</a> together with every
+paper citing them, downloaded on 2026-11-15: 79 papers of the author and 1,888 citing papers, with 16,920 citation
+links among them. Made with:</p>
+<pre>pip install citation-topics
+python inspire_profile.py 991924 works.jsonl     # examples/inspire_profile.py in the repository
+citation-topics run works.jsonl out/ --resolution 1 --min-size 20 --seed 4
+citation-topics describe works.jsonl out/ --abstracts
+citation-topics names out/ names.json            # names written by Claude's topic-namer skill
+citation-topics export out/ --works works.jsonl --highlight own --highlight-label "The author's papers"
+citation-topics board works.jsonl out/ --highlight own --highlight-label "The author's papers" \
+    --title "INSPIRE author 991924: citation topics" \
+    --vosviewer-url https://restrepo.github.io/citation-topics/examples/inspire-991924/works_vosviewer.json</pre>
+<p>The files: <a href="examples/inspire-991924/names.json">names.json</a>,
+<a href="examples/inspire-991924/works_vosviewer.json">works_vosviewer.json</a> (works) and
+<a href="examples/inspire-991924/topics_vosviewer.json">topics_vosviewer.json</a> (topics), for
+<a href="https://app.vosviewer.com/">VOSviewer Online</a> or VOSviewer. A new download from INSPIRE-HEP gives
+slightly different numbers as new citing papers appear.</p>
+
+<h2>Get it</h2>
+<pre>pip install citation-topics
+citation-topics --help</pre>
+<p><a href="https://github.com/restrepo/citation-topics">GitHub</a> (README with every command and the input
+format) · <a href="https://pypi.org/project/citation-topics/">PyPI</a></p>
+</main>
+</body>
+</html>

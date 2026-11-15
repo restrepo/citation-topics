@@ -1,0 +1,50 @@
+# Publishes docs/ to GitHub Pages (branch gh-pages) on every merge or push to main that changes it:
+#   docs/index.html                   -> index.html           (home)
+#   docs/leiden.html                  -> leiden.html          (how the topics are made)
+#   docs/examples/inspire-991924/     -> examples/inspire-991924/  (sample board and its VOSviewer files)
+# gh-pages is a mirror of docs/: files removed from docs/ are removed from the site. Nothing is built, downloaded
+# or released here; the sample is rebuilt by hand with the commands in docs/index.html.
+name: Pages
+
+on:
+  push:
+    branches: [main]
+    paths: ["docs/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write   # push gh-pages
+
+concurrency:
+  group: gh-pages
+  cancel-in-progress: false
+
+jobs:
+  pages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy docs/ to gh-pages and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for try in 1 2 3; do
+            rm -rf site && git worktree prune
+            if git fetch origin +gh-pages:refs/remotes/origin/gh-pages; then
+              git worktree add site origin/gh-pages && git -C site switch -C gh-pages
+            else
+              git worktree add --orphan -b gh-pages site   # first run: start the branch
+            fi
+            find site -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+            cp -R docs/. site/
+            touch site/.nojekyll
+            git -C site add -A
+            if git -C site diff --cached --quiet; then echo "gh-pages already matches docs/"; exit 0; fi
+            git -C site diff --cached --stat
+            git -C site commit -q -m "Pages from main ${GITHUB_SHA::7}"
+            if git -C site push origin gh-pages; then exit 0; fi
+            sleep $((try * 10))   # gh-pages moved meanwhile: start again from it
+          done
+          exit 1
