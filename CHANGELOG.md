@@ -4,6 +4,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Added
+- `examples/inspire_profile.py` and a README walk-through: the topics of an INSPIRE-HEP author's papers and
+  the papers citing them, named with or without Claude.
+
 ## [0.1.0] - 2026-11-15
 
 ### Added
