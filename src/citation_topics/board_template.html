@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__</title>
+<style>
+/* Layout: header with headline figures, a row of tabs, one panel per tab; data embedded below. */
+:root {
+  --bg: #f7f8f6; --panel: #ffffff; --fg: #1b1f1d; --muted: #5d6662; --line: #dfe3df; --accent: #2f6f8f;
+  --a0: #2f6f8f; --a1: #c06b2c; --a2: #4f8a4a; --a3: #8a5aa6; --a4: #b0435a; --a5: #6f7a2a; --a6: #3b8b8b; --a7: #8a6d3b;
+  --heat: #2f6f8f; --tip: #ffffff;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --serif: Georgia, "Times New Roman", serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141716; --panel: #1c201e; --fg: #e8ece9; --muted: #9aa49f; --line: #2e3431; --accent: #6fb3d2;
+  --a0: #6fb3d2; --a1: #e09a5f; --a2: #86c47f; --a3: #b98fd4; --a4: #e07b8f; --a5: #b5c062; --a6: #6cc4c4; --a7: #c9a46a;
+  --heat: #6fb3d2; --tip: #222725; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #141716; --panel: #1c201e; --fg: #e8ece9; --muted: #9aa49f; --line: #2e3431; --accent: #6fb3d2;
+  --a0: #6fb3d2; --a1: #e09a5f; --a2: #86c47f; --a3: #b98fd4; --a4: #e07b8f; --a5: #b5c062; --a6: #6cc4c4; --a7: #c9a46a;
+  --heat: #6fb3d2; --tip: #222725; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 var(--sans); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 28px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 22px; }
+.wrap > * { min-width: 0; }
+h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(1.6rem, 3.4vw, 2.3rem); line-height: 1.15; margin: 0; text-wrap: balance; }
+h2 { font-size: 1.05rem; font-weight: 600; margin: 0; }
+.take { margin: 0; color: var(--muted); max-width: 75ch; }
+.take b { color: var(--fg); font-weight: 600; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.tile { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 2px; }
+.tile b { font-family: var(--serif); font-weight: 400; font-size: 1.8rem; font-variant-numeric: tabular-nums; }
+.tile span { color: var(--muted); font-size: 13px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; border-bottom: 1px solid var(--line); }
+.tabs button { font: inherit; font-size: 14px; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted);
+  padding: 8px 12px; cursor: pointer; }
+.tabs button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); }
+.tabs button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.panel { display: grid; gap: 18px; }
+.sec { display: grid; gap: 8px; }
+.panel > *, .sec > * { min-width: 0; }
+.note { color: var(--muted); font-size: 13px; margin: 0; max-width: 80ch; }
+.chart { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px; min-height: 120px; }
+.chart svg { display: block; width: 100%; height: auto; }
+.tip { position: absolute; pointer-events: none; background: var(--tip); color: var(--fg); border: 1px solid var(--line);
+  box-shadow: 0 4px 16px rgb(0 0 0 / .12); border-radius: 8px; padding: 8px 10px; font-size: 13px; max-width: 280px; z-index: 3; }
+.tip .m { color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
+.tw { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.s { color: var(--muted); font-size: 13px; min-width: 160px; }
+tr:last-child td { border-bottom: 0; }
+td a { color: inherit; text-decoration-color: var(--line); }
+td a:hover { text-decoration-color: currentColor; }
+.ctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+input[type=search], select { font: inherit; font-size: 14px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--panel); color: var(--fg); max-width: 100%; }
+input[type=search] { width: min(320px, 100%); }
+.axis text { fill: var(--muted); font-size: 11px; }
+.axis path, .axis line { stroke: var(--line); }
+.lbl { fill: var(--fg); font-size: 11px; paint-order: stroke; stroke: var(--panel); stroke-width: 3px; }
+dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 16px; margin: 0; font-size: 14px; }
+dt { color: var(--muted); }
+dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+footer { color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="sec">
+    <h1 id="h-title"></h1>
+    <p class="take" id="take"></p>
+  </header>
+  <div class="tiles" id="tiles"></div>
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+
+  <section class="panel" id="p-overview" role="tabpanel">
+    <div class="sec">
+      <h2>Map of topics</h2>
+      <p class="note">Each circle is a topic, sized by its works and coloured by its area; lines join topics whose works cite each other, thicker for more links. Point at a circle for details.</p>
+      <div class="legend" id="area-legend"></div>
+      <div class="chart" id="map"></div>
+    </div>
+    <div class="sec">
+      <h2>Topics</h2>
+      <p class="note">Inside: share of a topic's citation links that stay within it. Terms: words that set the topic apart (from <code>describe</code>).</p>
+      <div class="tw"><table><thead><tr id="topics-head"></tr></thead><tbody id="topics-body"></tbody></table></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-timeline" role="tabpanel" hidden>
+    <div class="sec">
+      <h2>Works per year in each topic</h2>
+      <p class="note">Darker cells hold more works. Point at a cell for the count.</p>
+      <div class="chart" id="heat"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-works" role="tabpanel" hidden>
+    <div class="sec">
+      <h2>Works</h2>
+      <div class="ctl">
+        <input type="search" id="w-q" placeholder="Search titles" aria-label="Search titles">
+        <select id="w-topic" aria-label="Topic"></select>
+        <span class="note" id="w-count"></span>
+      </div>
+      <div class="tw"><table><thead><tr><th class="n">Year</th><th>Title</th><th class="n">Citations</th><th>Topic</th><th>Second topic</th></tr></thead><tbody id="w-body"></tbody></table></div>
+      <p class="note" id="w-limit"></p>
+    </div>
+  </section>
+
+  <section class="panel" id="p-highlight" role="tabpanel" hidden>
+    <div class="sec">
+      <h2 id="hl-title"></h2>
+      <p class="note" id="hl-note"></p>
+      <div class="tw"><table><thead><tr><th>Topic</th><th class="n">Works</th><th class="n">Citations</th><th class="n">Share of topic</th></tr></thead><tbody id="hl-topics"></tbody></table></div>
+      <div class="tw"><table><thead><tr><th class="n">Year</th><th>Title</th><th class="n">Citations</th><th>Topic</th><th>Second topic</th></tr></thead><tbody id="hl-body"></tbody></table></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-countries" role="tabpanel" hidden>
+    <div class="sec">
+      <h2>Countries by topic</h2>
+      <p class="note">Share of each topic's works with an author in the country (a work counts once per country). The 25 countries with most works.</p>
+      <div class="chart" id="cheat"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-authors" role="tabpanel" hidden>
+    <div class="sec">
+      <h2>Authors with most works in each topic</h2>
+      <div class="ctl"><select id="a-topic" aria-label="Topic"></select></div>
+      <div class="tw"><table><thead><tr><th>Author</th><th class="n">Works in the topic</th></tr></thead><tbody id="a-body"></tbody></table></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-about" role="tabpanel" hidden>
+    <div class="sec">
+      <h2>How this board was made</h2>
+      <p class="note">Built by citation-topics from a list of works and their references: Leiden clustering of the direct-citation network into topics, and of the graph of topics into areas. Names, when present, were written from each topic's description and recorded with who wrote them.</p>
+      <dl id="about"></dl>
+    </div>
+  </section>
+
+  <footer id="foot"></footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+const D = __DATA__;
+const M = D.meta;
+const fmt = d3.format(',');
+const AREA = (a) => `var(--a${a % 8})`;
+const byTopic = new Map(D.topics.map((t) => [t.topic, t]));
+const tname = (k) => (k == null ? 'No topic' : (byTopic.get(k) || {}).name || `Topic ${k}`);
+const el = (tag, attrs = {}, ...kids) => {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) { if (k === 'class') e.className = v; else e.setAttribute(k, v); }
+  for (const c of kids) e.append(c instanceof Node ? c : document.createTextNode(c ?? ''));
+  return e;
+};
+const TABS = {overview: 'Overview', timeline: 'Timeline', works: 'Works', highlight: M.highlight_label, countries: 'Countries',
+  authors: 'Authors', about: 'About'};
+
+document.getElementById('h-title').textContent = M.title;
+const largest = D.topics[0];
+const take = document.getElementById('take');
+take.append(`${fmt(M.works)} works form `, el('b', {}, String(M.topics)), ` topics in `, el('b', {}, String(M.areas)),
+  ' areas', largest ? '; the largest is ' : '.', ...(largest ? [el('b', {}, largest.name), ` (${fmt(largest.works)} works).`] : []));
+const tiles = [[fmt(M.works), 'Works'], [fmt(M.works_with_topic), 'Works with a topic'], [M.topics, 'Topics'], [M.areas, 'Areas'],
+  [fmt(M.links), 'Citation links']];
+if (M.highlighted) tiles.splice(1, 0, [fmt(M.highlighted), M.highlight_label]);
+for (const [v, k] of tiles) document.getElementById('tiles').append(el('div', {class: 'tile'}, el('b', {}, String(v)), el('span', {}, k)));
+document.getElementById('foot').textContent = `citation-topics ${M.version} · ${M.created}`;
+
+const tip = (box) => {
+  const t = el('div', {class: 'tip', hidden: ''});
+  box.append(t);
+  return {
+    show(ev, lines) {
+      t.replaceChildren(...lines.map(([s, cls]) => el('div', cls ? {class: cls} : {}, s)));
+      t.hidden = false;
+      const r = box.getBoundingClientRect();
+      const x = ev.clientX - r.left, y = ev.clientY - r.top;
+      t.style.left = `${Math.max(0, Math.min(x + 12, box.clientWidth - 290))}px`;
+      t.style.top = `${y + 14}px`;
+    },
+    hide() { t.hidden = true; },
+  };
+};
+
+/* tabs */
+const nav = document.getElementById('tabs');
+const shown = new Set();
+let current = null;
+function open(name) {
+  current = name;
+  for (const k of Object.keys(TABS)) {
+    const p = document.getElementById(`p-${k}`);
+    if (p) p.hidden = k !== name;
+  }
+  for (const b of nav.querySelectorAll('button')) b.setAttribute('aria-selected', String(b.dataset.tab === name));
+  if (!shown.has(name)) { shown.add(name); (DRAW[name] || (() => {}))(); }
+  try { history.replaceState(null, '', `#${name}`); } catch (e) { /* sandboxed */ }
+}
+for (const k of M.tabs) {
+  const b = el('button', {role: 'tab', 'data-tab': k, 'aria-selected': 'false'}, TABS[k]);
+  b.onclick = () => open(k);
+  nav.append(b);
+}
+
+/* overview */
+function drawMap() {
+  const box = document.getElementById('map');
+  box.replaceChildren();
+  const areas = d3.rollups(D.topics, (v) => v[0].area_name, (t) => t.area).sort((a, b) => a[0] - b[0]);
+  const lg = document.getElementById('area-legend');
+  lg.replaceChildren(...areas.map(([a, n]) => el('span', {}, (() => { const d = el('i', {class: 'dot'}); d.style.background = AREA(a); return d; })(), n)));
+  const W = Math.max(300, box.clientWidth - 16), H = W < 600 ? 400 : 520, n = D.topics.length;
+  const nodes = D.topics.map((t) => ({...t}));
+  const links = D.links.map(([s, t, w]) => ({source: s, target: t, w}));
+  const maxW = d3.max(nodes, (d) => d.works) || 1, maxL = d3.max(links, (d) => d.w) || 1;
+  const r = d3.scaleSqrt().domain([0, maxW]).range([0, Math.min(W < 600 ? 34 : 48, 900 / Math.sqrt(n + 1))]);
+  const sim = d3.forceSimulation(nodes)
+    .force('link', d3.forceLink(links).id((d) => d.topic).distance((d) => 30 + r(d.source.works) + r(d.target.works)).strength((d) => 0.05 + 0.5 * d.w / maxL))
+    .force('charge', d3.forceManyBody().strength(n > 100 ? -40 : -220))
+    .force('collide', d3.forceCollide((d) => r(d.works) + 3))
+    .force('x', d3.forceX(W / 2).strength(0.07)).force('y', d3.forceY(H / 2).strength(0.1)).stop();
+  for (let i = 0; i < 400; i++) sim.tick();
+  const [x0, x1] = d3.extent(nodes, (d) => d.x), [y0, y1] = d3.extent(nodes, (d) => d.y);
+  const pad = 50, sx = d3.scaleLinear().domain([x0, x1]).range([pad, W - pad]), sy = d3.scaleLinear().domain([y0, y1]).range([pad, H - pad]);
+  for (const d of nodes) { d.x = x1 > x0 ? sx(d.x) : W / 2; d.y = y1 > y0 ? sy(d.y) : H / 2; }
+  const svg = d3.select(box).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', `Map of ${n} topics`);
+  const show = links.filter((l) => l.w >= (n > 60 ? maxL * 0.05 : 0));
+  svg.append('g').selectAll('line').data(show).join('line').attr('x1', (d) => d.source.x).attr('y1', (d) => d.source.y)
+    .attr('x2', (d) => d.target.x).attr('y2', (d) => d.target.y).style('stroke', 'var(--line)')
+    .attr('stroke-width', (d) => 0.5 + 9 * d.w / maxL).attr('stroke-linecap', 'round');
+  const t = tip(box);
+  svg.append('g').selectAll('circle').data(nodes).join('circle').attr('cx', (d) => d.x).attr('cy', (d) => d.y).attr('r', (d) => Math.max(2, r(d.works)))
+    .style('fill', (d) => AREA(d.area)).style('fill-opacity', 0.9).style('stroke', 'var(--panel)').attr('stroke-width', 1.5)
+    .on('pointermove', (ev, d) => t.show(ev, [[`${d.topic}. ${d.name}`], [d.area_name, 'm'],
+      [`${fmt(d.works)} works${d.year_median ? ` · median year ${d.year_median}` : ''}${M.highlighted ? ` · ${d.hl} ${M.highlight_label.toLowerCase()}` : ''}`]]))
+    .on('pointerleave', () => t.hide());
+  const big = nodes.slice().sort((a, b) => b.works - a.works).slice(0, n > 40 ? 25 : n);
+  svg.append('g').selectAll('text').data(big).join('text').attr('class', 'lbl').attr('x', (d) => d.x).attr('y', (d) => d.y + Math.max(2, r(d.works)) + 12)
+    .attr('text-anchor', 'middle').text((d) => (d.name.length > 30 ? d.name.slice(0, 28) + '…' : d.name));
+}
+function drawTopics() {
+  const cols = [['#', 'n'], ['Topic', ''], ['Area', ''], ['Works', 'n'], ['Inside %', 'n']];
+  if (D.topics.some((t) => t.year_median)) cols.push(['Median year', 'n']);
+  if (M.highlighted) cols.push([M.highlight_label, 'n']);
+  cols.push(['Terms', '']);
+  document.getElementById('topics-head').replaceChildren(...cols.map(([h, c]) => el('th', c ? {class: c} : {}, h)));
+  const body = document.getElementById('topics-body');
+  body.replaceChildren(...D.topics.map((t) => {
+    const area = el('td', {}, (() => { const d = el('i', {class: 'dot'}); d.style.background = AREA(t.area); d.style.marginRight = '6px'; return d; })(), t.area_name);
+    const row = [el('td', {class: 'n'}, String(t.topic)), el('td', {}, t.name), area, el('td', {class: 'n'}, fmt(t.works)),
+      el('td', {class: 'n'}, String(Math.round(100 * t.share_inside)))];
+    if (cols.some(([h]) => h === 'Median year')) row.push(el('td', {class: 'n'}, String(t.year_median ?? '')));
+    if (M.highlighted) row.push(el('td', {class: 'n'}, String(t.hl)));
+    row.push(el('td', {class: 's'}, t.terms));
+    return el('tr', {}, ...row);
+  }));
+}
+
+/* timeline */
+function heat(boxId, rows, cols, cell, label, colLabel, tipLine) {
+  const box = document.getElementById(boxId);
+  box.replaceChildren();
+  const W = Math.max(300, box.clientWidth - 16), narrow = W < 600;
+  const svg = d3.select(box).append('svg');
+  const probe = svg.append('g').attr('class', 'axis');
+  let left = 0;
+  for (const r of rows) left = Math.max(left, probe.append('text').text(label(r, narrow)).node().getComputedTextLength());
+  probe.remove();
+  left = Math.ceil(left) + 10;
+  const rowH = narrow ? 16 : 20, top = 4, bottom = 26, H = top + rowH * rows.length + bottom;
+  svg.attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', box.previousElementSibling ? box.previousElementSibling.textContent : '');
+  const x = d3.scaleBand().domain(cols).range([left, W - 4]).paddingInner(0.08);
+  const y = d3.scaleBand().domain(rows.map((r) => r.key)).range([top, top + rowH * rows.length]).paddingInner(0.12);
+  const max = d3.max(cell, (d) => d.v) || 1, op = d3.scaleSqrt().domain([0, max]).range([0.07, 1]);
+  const t = tip(box);
+  svg.append('g').selectAll('rect').data(cell).join('rect').attr('x', (d) => x(d.c)).attr('y', (d) => y(d.r)).attr('width', x.bandwidth())
+    .attr('height', y.bandwidth()).attr('rx', 2).style('fill', 'var(--heat)').style('fill-opacity', (d) => op(d.v))
+    .on('pointermove', (ev, d) => t.show(ev, tipLine(d))).on('pointerleave', () => t.hide());
+  svg.append('g').attr('class', 'axis').selectAll('text').data(rows).join('text').attr('x', left - 8).attr('y', (r) => y(r.key) + y.bandwidth() / 2)
+    .attr('dy', '0.35em').attr('text-anchor', 'end').text((r) => label(r, narrow));
+  const every = Math.max(1, Math.ceil(cols.length / (narrow ? 6 : 14)));
+  svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${top + rowH * rows.length + 2})`)
+    .call(d3.axisBottom(x).tickValues(cols.filter((c, i) => colLabel ? i % every === 0 : c % (every > 4 ? 10 : 5) === 0)).tickSize(3)
+      .tickFormat(colLabel || d3.format('d')));
+}
+function drawTimeline() {
+  const ys = D.years.map((r) => r[1]);
+  const cols = d3.range(d3.min(ys), d3.max(ys) + 1);
+  const shown = D.topics.slice(0, 60);
+  const keep = new Set(shown.map((t) => t.topic));
+  heat('heat', shown.map((t) => ({key: t.topic, t})), cols, D.years.filter((r) => keep.has(r[0])).map(([k, yv, v]) => ({r: k, c: yv, v})),
+    (r, narrow) => (narrow ? String(r.t.topic) : `${r.t.topic}  ${r.t.name.length > 32 ? r.t.name.slice(0, 30) + '…' : r.t.name}`), null,
+    (d) => [[`${d.c}: ${fmt(d.v)} works`], [`${d.r}. ${tname(d.r)}`, 'm']]);
+}
+
+/* works */
+const WK = D.works.map(([id, title, year, cites, topic, second, url, hl]) => ({id, title, year, cites, topic, second, url, hl}));
+function workRow(w) {
+  const title = w.url ? el('a', {href: w.url, target: '_blank', rel: 'noopener'}, w.title || w.id) : (w.title || w.id);
+  return el('tr', {}, el('td', {class: 'n'}, String(w.year ?? '')), el('td', {}, title), el('td', {class: 'n'}, fmt(w.cites)),
+    el('td', {}, tname(w.topic)), el('td', {}, w.second == null ? '' : tname(w.second)));
+}
+function topicOptions(sel, all) {
+  sel.replaceChildren(new Option(all, ''), ...D.topics.map((t) => new Option(`${t.topic}. ${t.name}`, String(t.topic))));
+}
+function drawWorks() {
+  const q = document.getElementById('w-q'), s = document.getElementById('w-topic');
+  topicOptions(s, 'All topics');
+  const go = () => {
+    const words = q.value.toLowerCase().split(/\s+/).filter(Boolean);
+    const rows = WK.filter((w) => (s.value === '' || String(w.topic) === s.value) && words.every((x) => (w.title || '').toLowerCase().includes(x)));
+    document.getElementById('w-body').replaceChildren(...rows.slice(0, 300).map(workRow));
+    document.getElementById('w-count').textContent = `${fmt(rows.length)} works${rows.length > 300 ? ', first 300 shown' : ''}, most cited first`;
+  };
+  q.oninput = go; s.onchange = go; go();
+  document.getElementById('w-limit').textContent = M.works_listed < M.works_total
+    ? `The board holds the ${fmt(M.works_listed)} most cited of ${fmt(M.works_total)} works${M.highlighted ? ` plus every one of the ${M.highlight_label.toLowerCase()}` : ''}.` : '';
+}
+
+/* highlight */
+function drawHighlight() {
+  document.getElementById('hl-title').textContent = M.highlight_label;
+  const hl = WK.filter((w) => w.hl);
+  document.getElementById('hl-note').textContent = `${fmt(hl.length)} works, by topic and then most cited first.`;
+  const rows = D.topics.filter((t) => t.hl).sort((a, b) => b.hl - a.hl);
+  document.getElementById('hl-topics').replaceChildren(...rows.map((t) => el('tr', {}, el('td', {}, `${t.topic}. ${t.name}`),
+    el('td', {class: 'n'}, String(t.hl)), el('td', {class: 'n'}, fmt(t.hl_citations)), el('td', {class: 'n'}, `${Math.round(100 * t.hl / t.works)}%`))));
+  document.getElementById('hl-body').replaceChildren(...hl.map(workRow));
+}
+
+/* countries */
+function drawCountries() {
+  const rows = D.countries.map(([c, by]) => ({key: c, by: new Map(by)}));
+  const shown = D.topics.slice(0, 40);
+  const cells = [];
+  for (const r of rows) for (const t of shown) { const n = r.by.get(t.topic) || 0; if (n) cells.push({r: r.key, c: t.topic, v: n / t.works, n}); }
+  heat('cheat', rows, shown.map((t) => t.topic), cells, (r) => r.key, (k) => String(k),
+    (d) => [[`${d.r}: ${Math.round(100 * d.v)}% of topic ${d.c}`], [`${fmt(d.n)} works · ${tname(d.c)}`, 'm']]);
+}
+
+/* authors */
+function drawAuthors() {
+  const s = document.getElementById('a-topic');
+  topicOptions(s, 'Choose a topic');
+  s.value = String(D.topics[0]?.topic ?? '');
+  const go = () => {
+    const list = D.authors[s.value] || [];
+    document.getElementById('a-body').replaceChildren(...list.map(([a, n]) => el('tr', {}, el('td', {}, a), el('td', {class: 'n'}, String(n)))));
+  };
+  s.onchange = go; go();
+}
+
+/* about */
+function drawAbout() {
+  const dl = document.getElementById('about');
+  const p = M.parameters || {}, v = M.versions || {};
+  const items = [
+    ['Works', `${fmt(M.works)} (${fmt(M.works_with_topic)} with a topic)`], ['Citation links', fmt(M.links)],
+    ['Topics / areas', `${M.topics} / ${M.areas}`],
+    ['Parameters', Object.entries(p).filter(([, x]) => x != null).map(([k, x]) => `${k} ${x}`).join(', ')],
+    ['Fields present', Object.entries(M.fields).map(([k, n]) => `${k} (${fmt(n)})`).join(', ') || 'only ids and references'],
+    ['Names', M.names ? `${M.names.by || ''} ${M.names.model ? `(${M.names.model})` : ''} ${M.names.date || ''}`.trim() : 'not named'],
+    ['Input', M.input ? `${M.input.file}, MD5 ${M.input.md5}` : ''],
+    ['Versions', Object.entries(v).map(([k, x]) => `${k} ${x}`).join(', ')],
+  ];
+  dl.replaceChildren(...items.flatMap(([k, x]) => [el('dt', {}, k), el('dd', {}, x)]));
+}
+
+const DRAW = {overview: () => { drawMap(); drawTopics(); }, timeline: drawTimeline, works: drawWorks, highlight: drawHighlight,
+  countries: drawCountries, authors: drawAuthors, about: drawAbout};
+const start = (location.hash || '').slice(1);
+open(M.tabs.includes(start) ? start : 'overview');
+let rw;
+addEventListener('resize', () => { clearTimeout(rw); rw = setTimeout(() => {
+  if (current === 'overview') drawMap(); else if (['timeline', 'countries'].includes(current)) DRAW[current]();
+}, 200); });
+</script>
+</body>
+</html>

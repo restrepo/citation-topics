@@ -92,6 +92,22 @@ def cmd_export(a):
         export_csv(a.out, log=_log(a.quiet))
 
 
+def cmd_board(a):
+    from .board import board
+
+    board(
+        a.input,
+        a.out,
+        _fields(a),
+        html=a.html,
+        highlight=a.highlight,
+        highlight_label=a.highlight_label,
+        title=a.title,
+        max_works=a.max_works,
+        log=_log(a.quiet),
+    )
+
+
 def cmd_skills(a):
     from .skills import install, list_skills
 
@@ -156,6 +172,18 @@ def main(argv=None):
     p.add_argument("--min-links", type=int, default=1, help="VOSviewer: drop links between topics weaker than this")
     p.add_argument("-q", "--quiet", action="store_true")
     p.set_defaults(func=cmd_export)
+
+    p = sub.add_parser("board", help="self-contained HTML board of a run, with a tab for each view the fields allow")
+    p.add_argument("input", help="the input file of `run`")
+    p.add_argument("out", help="output folder of `run`")
+    _input_args(p)
+    p.add_argument("--html", help="where to write the page (default OUT/board.html)")
+    p.add_argument("--title", help="page title (default: Citation topics)")
+    p.add_argument("--highlight", metavar="FIELD", help="true/false input field marking works to follow, e.g. own")
+    p.add_argument("--highlight-label", default="Highlighted works", help="name of that tab (e.g. 'Your papers')")
+    p.add_argument("--max-works", type=int, default=5000, help="most cited works kept for the Works tab (default 5000)")
+    p.add_argument("-q", "--quiet", action="store_true")
+    p.set_defaults(func=cmd_board)
 
     p = sub.add_parser("skills", help="list or install the Claude skills and the topic-namer agent")
     p.add_argument("action", choices=["list", "install"])

@@ -41,7 +41,14 @@ A JSON array or JSON Lines file (optionally gzipped), one object per work:
 | `title`, `abstract`, `keywords`, `journal`, `categories` | the description of each topic (`describe`), hence its name |
 | `citations` | most cited works by that count (otherwise by citations inside the list) |
 | `countries` | countries of each topic in the description |
-| `authors`, `url` | counted in `meta.json`; `url` is copied to the most cited works of the description |
+| `authors` | the Authors tab of the board |
+| `url` | links from the board and the description to each work |
+| any true/false field, e.g. `own` | a tab of the board that follows those works (`board --highlight own`) |
+
+Naming needs at least one of `title`, `abstract`, `keywords`, `journal` or `categories`: `describe` lists the
+ones missing in `dossier.json` (`missing`), and the `topic-namer` skill stops and says so when none is there. No
+field is fetched or inferred from elsewhere. Fields the package does not know are kept in the input and ignored,
+so a list can carry them from the start for a later board.
 
 ## Commands
 
@@ -50,6 +57,7 @@ citation-topics run works.jsonl.gz out/            # network, topics, areas, sec
 citation-topics describe works.jsonl.gz out/       # out/dossier.json: what each topic is about
 citation-topics names out/ names.json              # put names into topics.json and areas.json
 citation-topics export out/                        # VOSviewer JSON and map/network files, CSVs
+citation-topics board works.jsonl.gz out/          # out/board.html: tabs for what the fields allow
 citation-topics agreement out_s1/ out_s2/ ...      # NMI/ARI between seeds, and the medoid to keep
 citation-topics compare old/ new/ cmp/             # where earlier topics went; names carried over
 citation-topics skills install                     # Claude skills and the topic-namer agent into ./.claude
@@ -120,9 +128,17 @@ The topics of an author's papers together with every paper citing them. Tried on
 
      Unnamed topics are shown as "Topic N".
 
-6. **Look at the map:** open `out/topics_vosviewer.json` in [VOSviewer Online](https://app.vosviewer.com/)
-   (Open → the file) or in VOSviewer. Each topic is a circle sized by its works and coloured by its area; the
-   author's papers per topic are those with `"own": true` in `works.jsonl` joined to `out/works.jsonl.gz` by `id`.
+6. **Board:** one page with the map and table of topics, works per year, a searchable list of works and a tab
+   with the author's own papers by topic:
+
+   ```bash
+   citation-topics board works.jsonl out/ --highlight own --highlight-label "Your papers" --title "Your name: citation topics"
+   ```
+
+   Open `out/board.html` in a browser, or ask Claude to publish it (skill `topics-board`).
+
+7. **VOSviewer (optional):** open `out/topics_vosviewer.json` in [VOSviewer Online](https://app.vosviewer.com/)
+   (Open → the file) or in VOSviewer.
 
 ## Method
 
@@ -163,6 +179,7 @@ journals, categories and countries took 10 minutes and 4.4 GB.
 | `dossier.json` | description of each topic and area (`describe`) |
 | `topics_vosviewer.json`, `topics_map.txt`, `topics_network.txt` | graph of topics for VOSviewer (`export`) |
 | `topics.csv`, `works_topics.csv.gz` | the same as tables (`export`) |
+| `board.html` | self-contained board: Overview always, then Timeline, Works, highlight, Countries and Authors as the fields allow, and About (`board`) |
 | `network.npz`, `clusters.npz` | arrays reused by the other commands |
 
 ## Claude skills
@@ -172,6 +189,7 @@ journals, categories and countries took 10 minutes and 4.4 GB.
 - `topics-run`: checks the input, chooses the parameters, runs, describes and exports, and explains the result;
 - `topic-namer`: names topics and areas from `dossier.json` and applies them, after carrying over earlier names;
 - `topics-compare`: seeds (which run to keep) and earlier runs or time windows (fates, flows, names);
+- `topics-board`: builds the board with the tabs the fields allow and says which fields would add the others;
 - the agent `topic-namer`, which names a batch of topics when the skill hands it one.
 
 In Claude Desktop or Claude Code, ask for topics of a list of works and the skills take it from there.
