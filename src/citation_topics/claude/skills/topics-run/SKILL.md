@@ -52,8 +52,9 @@ For another list, tune them:
 - Seeds: Leiden depends on its random seed. For a result to keep, run 3-4 seeds (`--seed 1..4`, into different
   folders) and keep the medoid with `citation-topics agreement OUT1 OUT2 OUT3 OUT4`.
 
-Run large lists in the background: for 1.9 million works and 25 million links, about 2 GB of memory and
-20-30 minutes per seed. The same input, parameters and versions (all in `meta.json`) give the same topics.
+Run large lists in the background. Measured on 1.9 million works and 44 million links: `run` 45 minutes with
+20 passes (about 85 s per pass) and over 4 GB of memory; `describe` with titles 10 minutes and 4.4 GB. The same
+input, parameters and versions (all in `meta.json`) give the same topics.
 
 ## 3. Describe and name
 

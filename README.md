@@ -79,6 +79,12 @@ of that many runs). Tune them for other lists; the skill `topics-run` explains h
 The same input, parameters and versions of igraph and leidenalg give the same topics; `meta.json` records them
 with the MD5 of the input.
 
+**Checked against inspireauth10.** On its 1,872,221 INSPIRE papers (44 million citation links) with the
+defaults, `run` gives the same network, the same 304 topics and 6 areas, the same Leiden quality and the same
+second and third topics as inspireauth10's own scripts, array for array (igraph 1.0.0, leidenalg 0.12.0, numpy
+2.5.4, Python 3.13). It took 45 minutes and more than 4 GB of memory; `describe` with titles, keywords,
+journals, categories and countries took 10 minutes and 4.4 GB.
+
 ## Output
 
 | File | Content |
