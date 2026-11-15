@@ -9,18 +9,18 @@
 :root {
   --bg: #f7f8f6; --panel: #ffffff; --fg: #1b1f1d; --muted: #5d6662; --line: #dfe3df; --accent: #2f6f8f;
   --a0: #2f6f8f; --a1: #c06b2c; --a2: #4f8a4a; --a3: #8a5aa6; --a4: #b0435a; --a5: #6f7a2a; --a6: #3b8b8b; --a7: #8a6d3b;
-  --heat: #2f6f8f; --tip: #ffffff;
+  --heat: #2f6f8f; --tip: #ffffff; --ref: #b8327f; --cit: #c98500;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --serif: Georgia, "Times New Roman", serif;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #141716; --panel: #1c201e; --fg: #e8ece9; --muted: #9aa49f; --line: #2e3431; --accent: #6fb3d2;
   --a0: #6fb3d2; --a1: #e09a5f; --a2: #86c47f; --a3: #b98fd4; --a4: #e07b8f; --a5: #b5c062; --a6: #6cc4c4; --a7: #c9a46a;
-  --heat: #6fb3d2; --tip: #222725; color-scheme: dark; } }
+  --heat: #6fb3d2; --tip: #222725; --ref: #e27ab8; --cit: #f0b440; color-scheme: dark; } }
 :root[data-theme="dark"] {
   --bg: #141716; --panel: #1c201e; --fg: #e8ece9; --muted: #9aa49f; --line: #2e3431; --accent: #6fb3d2;
   --a0: #6fb3d2; --a1: #e09a5f; --a2: #86c47f; --a3: #b98fd4; --a4: #e07b8f; --a5: #b5c062; --a6: #6cc4c4; --a7: #c9a46a;
-  --heat: #6fb3d2; --tip: #222725; color-scheme: dark; }
+  --heat: #6fb3d2; --tip: #222725; --ref: #e27ab8; --cit: #f0b440; color-scheme: dark; }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 var(--sans); }
 .wrap { max-width: 1180px; margin: 0 auto; padding-block: 28px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px));
@@ -79,6 +79,9 @@ footer { color: var(--muted); font-size: 12px; }
   white-space: nowrap; border: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 45%, transparent); color: var(--fg); }
 .ndet { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 4px; font-size: 14px; }
 .ndet b { font-size: 15px; font-weight: 600; }
+.ndet .lk { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.ndet .lk span { display: inline-flex; align-items: center; gap: 6px; }
+.ndet .lk i { width: 18px; height: 3px; border-radius: 2px; display: inline-block; }
 .ndet .m { color: var(--muted); }
 .ndet a { color: var(--accent); justify-self: start; }
 .ndet button { justify-self: start; font: inherit; font-size: 13px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--fg); cursor: pointer; margin-top: 4px; }
@@ -416,16 +419,21 @@ let NET = null;
 function drawNetwork() {
   const N = D.network, box = document.getElementById('net'), cv = document.getElementById('n-canvas');
   if (!NET) {
-    const nodes = N.nodes.map(([x, y, k, c, yr, f, ti, url, au, fa], i) => ({i, x, y, k, c, yr, f, ti, url, au, fa, nb: []}));
+    const nodes = N.nodes.map(([x, y, k, c, yr, f, ti, url, au, fa], i) => ({i, x, y, k, c, yr, f, ti, url, au, fa, refs: [], cits: [], nb: []}));
     const L = N.links;
-    for (let i = 0; i < L.length; i += 2) { nodes[L[i]].nb.push(L[i + 1]); nodes[L[i + 1]].nb.push(L[i]); }
+    const mutual = new Set(N.mutual || []);
+    for (let i = 0; i < L.length; i += 2) {  // the first work of each pair cites the second
+      const a = nodes[L[i]], b = nodes[L[i + 1]];
+      a.refs.push(b.i); b.cits.push(a.i); a.nb.push(b.i); b.nb.push(a.i);
+      if (mutual.has(i / 2)) { b.refs.push(a.i); a.cits.push(b.i); }
+    }
     const area = new Map(D.topics.map((t) => [t.topic, t.area]));
     const areas = d3.rollups(D.topics, (v) => v[0].area_name, (t) => t.area).sort((a, b) => a[0] - b[0]);
     document.getElementById('n-legend').replaceChildren(...areas.map(([a, n]) => el('span', {}, (() => { const d = el('i', {class: 'dot'}); d.style.background = AREA(a); return d; })(), n)),
       ...(M.highlighted ? [el('span', {}, (() => { const d = el('i', {class: 'dot'}); d.style.background = 'transparent'; d.style.boxShadow = 'inset 0 0 0 2px var(--fg)'; return d; })(), M.highlight_label)] : []));
     document.getElementById('n-note').textContent = `Each dot is one of the ${fmt(nodes.length)} works with a citation link, sized by its citations and coloured by its area; `
       + `${fmt(L.length / 2)} lines are the citation links. Each cluster holds the works of one topic, laid out by the links among them and labelled with the topic's name; clusters with more links between them sit closer`
-      + `${M.highlighted ? `; ringed dots are ${M.highlight_label.toLowerCase()}` : ''}. Scroll or pinch to zoom, drag to move, point at a dot for the work, click it to show only its citation links, with its details below the graph.`;
+      + `${M.highlighted ? `; ringed dots are ${M.highlight_label.toLowerCase()}` : ''}. Scroll or pinch to zoom, drag to move, point at a dot for the work, click it to show only its citation links (to the works it cites and to the works citing it, in two colours), with its details below the graph.`;
     if (M.vosviewer) { const a = document.getElementById('n-vos'); a.href = M.vosviewer; a.hidden = false; }
     const sel = document.getElementById('n-topic');
     sel.replaceChildren(el('option', {value: ''}, 'All topics'), ...D.topics.map((t) => el('option', {value: t.topic}, `${t.topic}. ${t.name}`)));
@@ -434,7 +442,9 @@ function drawNetwork() {
     box.append(NET.pop);
     addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && NET.sel) NET.select(null); });
     sel.onchange = () => { NET.focus = sel.value === '' ? null : +sel.value; NET.paint(); };
-    document.getElementById('n-links').onchange = () => NET.paint();
+    const linksBox = document.getElementById('n-links');
+    if (L.length / 2 > 150000) linksBox.checked = false;  // drawing every link makes zooming slow
+    linksBox.onchange = () => NET.paint();
     document.getElementById('n-reset').onclick = () => d3.select(cv).transition().duration(300).call(NET.zoom.transform, d3.zoomIdentity);
     matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => NET.paint());
   }
@@ -457,9 +467,12 @@ function drawNetwork() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
     ctx.save(); ctx.translate(t.x, t.y); ctx.scale(t.k, t.k);
     if (S) {
-      ctx.lineWidth = 1.2 / t.k; ctx.strokeStyle = fg; ctx.globalAlpha = 0.7; ctx.beginPath();
-      for (const j of S.nb) { ctx.moveTo(S.bx, S.by); ctx.lineTo(nodes[j].bx, nodes[j].by); }
-      ctx.stroke();
+      ctx.lineWidth = 1.3 / t.k; ctx.globalAlpha = 0.75;
+      for (const [list, c] of [[S.cits, css('--cit')], [S.refs, css('--ref')]]) {
+        ctx.strokeStyle = c; ctx.beginPath();
+        for (const j of list) { ctx.moveTo(S.bx, S.by); ctx.lineTo(nodes[j].bx, nodes[j].by); }
+        ctx.stroke();
+      }
     } else if (document.getElementById('n-links').checked) {
       ctx.lineWidth = 0.5 / t.k; ctx.strokeStyle = line; ctx.globalAlpha = NET.focus == null ? 0.55 : 0.25;
       ctx.beginPath();
@@ -517,7 +530,10 @@ function drawNetwork() {
     p.hidden = false;
     const kids = [el('b', {}, d.ti || 'Untitled')];
     if (d.au) kids.push(el('span', {}, d.au));
-    kids.push(el('span', {class: 'm'}, [d.yr, `${fmt(d.c)} citations`, `${fmt(d.nb.length)} citation links here`, d.f ? M.highlight_label : null].filter(Boolean).join(' · ')));
+    kids.push(el('span', {class: 'm'}, [d.yr, `${fmt(d.c)} citations`, d.f ? M.highlight_label : null].filter(Boolean).join(' · ')));
+    const sw = (v) => { const i = el('i'); i.style.background = `var(${v})`; return i; };
+    kids.push(el('span', {class: 'lk'}, el('span', {}, sw('--ref'), `cites ${fmt(d.refs.length)} works of the graph`),
+      el('span', {}, sw('--cit'), `cited by ${fmt(d.cits.length)} works of the graph`)));
     kids.push(el('span', {class: 'm'}, tname(d.k)));
     if (d.url) {
       const host = (() => { try { return new URL(d.url).hostname; } catch (e) { return ''; } })();

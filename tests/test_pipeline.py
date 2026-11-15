@@ -9,6 +9,7 @@ from citation_topics.compare import agreement, compare
 from citation_topics.describe import describe, terms_of
 from citation_topics.export import _authors, _first_author, export_csv, export_vosviewer, export_works_vosviewer
 from citation_topics.io import Fields, as_list, as_year, iter_works
+from citation_topics.layout import work_positions
 from citation_topics.names import apply_names
 from citation_topics.network import build
 from citation_topics.run import load, run
@@ -240,6 +241,12 @@ def test_network_and_works_vosviewer(works_file, run_out):
     xy = np.array([n[:2] for n in net["nodes"]])
     assert len(net["nodes"]) == 4 * SIZE and xy.min() >= 0 and xy.max() <= 1000.01  # the isolated work is left out
     assert sorted(lab[0] for lab in net["labels"]) == [0, 1, 2, 3]
+    n_, c_ = load(run_out)
+    linked, _, a, b, both = work_positions(n_, c_["topic"])
+    refs = {str(w["id"]): {str(r) for r in w["references"]} for w in planted()}
+    for x, y in zip(a, b):  # each pair: the first cites the second
+        assert n_.ids[linked[y]] in refs[n_.ids[linked[x]]]
+    assert len(net["mutual"]) == int(both.sum())
     centre = {k: xy[[n[2] == k for n in net["nodes"]]].mean(0) for k in range(4)}
     spread = max(np.linalg.norm(xy[[n[2] == k for n in net["nodes"]]] - centre[k], axis=1).max() for k in range(4))
     gap = min(np.linalg.norm(centre[i] - centre[j]) for i in range(4) for j in range(i))

@@ -112,7 +112,7 @@ def export_works_vosviewer(input, out, fields=None, highlight=None, highlight_la
     pos = work_positions(net, c["topic"])
     if pos is None:
         return None
-    linked, xy, a, b = pos
+    linked, xy, a, b, _ = pos
     topics, _ = _rows(out)
     tname = {e["topic"]: e.get("name") or f"Topic {e['topic']}" for e in topics}
     want = {net.ids[i]: j for j, i in enumerate(linked)}

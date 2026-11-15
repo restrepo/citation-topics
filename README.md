@@ -135,8 +135,9 @@ areas, in about a minute; the result is the [sample board](https://restrepo.gith
      Unnamed topics are shown as "Topic N".
 
 6. **Board:** one page with the map and table of topics, works per year, a searchable list of works, the network
-   of works with one labelled cluster per topic (click a work to see only its citation links, its first author beside it,
-   and its authors, year, citations and INSPIRE link below the graph), and a tab with the author's own papers by topic:
+   of works with one labelled cluster per topic (click a work to see only its citation links, magenta to the works it
+   cites and amber to the works citing it, its first author beside it, and its authors, year, citations and
+   INSPIRE link below the graph), and a tab with the author's own papers by topic:
 
    ```bash
    citation-topics board works.jsonl out/ --highlight own --highlight-label "Your papers" --title "Your name: citation topics"
@@ -173,6 +174,9 @@ areas, in about a minute; the result is the [sample board](https://restrepo.gith
 6. **Network of works** (`board`, `export --works`, up to `--network-max` works, 10,000 by default): each topic
    is a disc with area proportional to its works, placed by the links between topics and pushed apart until none
    overlap; inside it, the topic's works are placed by the links among them (Fruchterman-Reingold, igraph).
+   Comfortable up to 10,000 works and about 50 topics (the default limit); usable to about 20,000 works
+   (`--network-max 20000`), where zooming gets slower and the board weighs about 5 MB. Above 150,000 links the
+   board starts with the links hidden. Measured sizes and times are in the `community-graph` skill.
 7. **Names**: written by Claude from the description (skill `topic-namer`), never by the package. `compare`
    carries names over from an earlier run: a topic sharing 60% of its works both ways with an earlier one keeps
    its name.
@@ -208,6 +212,8 @@ journals, categories and countries took 10 minutes and 4.4 GB.
 - `topics-run`: checks the input, chooses the parameters, runs, describes and exports, and explains the result;
 - `topic-namer`: names topics and areas from `dossier.json` and applies them, after carrying over earlier names;
 - `topics-compare`: seeds (which run to keep) and earlier runs or time windows (fates, flows, names);
+- `community-graph`: the whole path from an INSPIRE-HEP profile or any list of works to the community graph
+  (topics as labelled clusters of real works, the board, the VOSviewer file and link), with the size limits;
 - `topics-board`: builds the board with the tabs the fields allow and says which fields would add the others;
 - the agent `topic-namer`, which names a batch of topics when the skill hands it one.
 
