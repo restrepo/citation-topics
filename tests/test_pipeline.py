@@ -203,6 +203,8 @@ def test_board_tabs_follow_the_fields(works_file, run_out, tmp_path):
     d = _board_data(run_out / "board.html")
     assert len(d["topics"]) == 4 and d["meta"]["works_listed"] == d["meta"]["works_total"] == 4 * SIZE + 1
     assert d["countries"][0][0] == "Colombia" and "</script" not in json.dumps(d)
+    # panels are laid out with display: grid, which would override the hidden attribute of the closed tabs
+    assert "[hidden] { display: none !important; }" in (run_out / "board.html").read_text()
     bare = tmp_path / "bare.json"
     bare.write_text(json.dumps([{"id": w["id"], "references": w["references"]} for w in planted()]))
     run(bare, tmp_path / "b", **QUIET, **PARAMS)
