@@ -13,6 +13,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
   stay.
 - `export --works INPUT`: `works_vosviewer.json`, the network of works for VOSviewer with the board's positions and
   one named cluster per topic and the authors in each work's description.
+- Network tab: the selected work's links in two colours, to the works it cites and to the works citing it, with
+  both counts below the graph; above 150,000 links the board opens with the links hidden.
+- Claude skill `community-graph`: from an INSPIRE-HEP profile or any list of works to the community graph, with
+  measured size limits.
 - `examples/inspire_profile.py` also writes `authors` (the first 10), `author_count` and `collaborations`.
 - Site on GitHub Pages (`docs/`, published by the `pages.yml` workflow on every merge to main): how the topics are
   made, and the sample board of the INSPIRE-HEP author 991924 with its VOSviewer files.

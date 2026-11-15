@@ -195,7 +195,7 @@ def _network(net, topic, info, flags, seed=1):
     pos = work_positions(net, topic, seed)
     if pos is None:
         return None
-    linked, xy, a, b = pos
+    linked, xy, a, b, both = pos
     t = topic[linked]
     labels = [  # topic, x of its centre, y just above and just below its works
         [int(k), *(round(float(v), 1) for v in (np.median(xy[t == k, 0]), *np.quantile(xy[t == k, 1], [0.03, 0.97])))]
@@ -219,7 +219,12 @@ def _network(net, topic, info, flags, seed=1):
                 r[9],
             ]
         )
-    return {"nodes": nodes, "links": np.column_stack([a, b]).ravel().tolist(), "labels": labels}
+    return {
+        "nodes": nodes,
+        "links": np.column_stack([a, b]).ravel().tolist(),  # pairs: the first cites the second
+        "mutual": np.flatnonzero(both).tolist(),  # pairs that also cite the other way
+        "labels": labels,
+    }
 
 
 def _esc(s):

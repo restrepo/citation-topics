@@ -12,8 +12,9 @@ import numpy as np
 
 
 def work_positions(net, topic, seed=1):
-    """Returns (linked, xy, a, b): the nodes with at least one link, their positions scaled into 0..1000, and
-    the links as pairs of indices into `linked`. None if no work has a link."""
+    """Returns (linked, xy, a, b, both): the nodes with at least one link, their positions scaled into 0..1000,
+    and the links as pairs of indices into `linked`, each pair once, oriented so that a cites b; `both` marks the
+    pairs that cite each other. None if no work has a link."""
     import igraph as ig
 
     lo, hi = net.pairs()
@@ -22,6 +23,10 @@ def work_positions(net, topic, seed=1):
         return None
     sub = np.full(net.n, -1)
     sub[linked] = np.arange(len(linked))
+    cites = np.unique(net.src.astype(np.int64) * net.n + net.dst)
+    forward = np.isin(lo.astype(np.int64) * net.n + hi, cites)  # lo cites hi
+    both = forward & np.isin(hi.astype(np.int64) * net.n + lo, cites)
+    lo, hi = np.where(forward, lo, hi), np.where(forward, hi, lo)
     a, b = sub[lo], sub[hi]
     t = topic[linked]
     groups = np.where(t >= 0, t, t.max() + 1 if (t >= 0).any() else 0)  # works with no topic form one group
@@ -49,7 +54,7 @@ def work_positions(net, topic, seed=1):
         ig.set_random_number_generator(random)
     lo_, hi_ = xy.min(0), xy.max(0)
     xy = (xy - lo_) * (1000 / max((hi_ - lo_).max(), 1e-9))
-    return linked, xy, a, b
+    return linked, xy, a, b, both
 
 
 def _separate(c, r, gap, steps=500):
