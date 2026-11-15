@@ -75,13 +75,13 @@ footer { color: var(--muted); font-size: 12px; }
 .net { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; touch-action: none; }
 .net canvas { display: block; width: 100%; cursor: grab; }
 .net canvas:active { cursor: grabbing; }
-.npop { position: absolute; z-index: 4; width: min(320px, calc(100% - 16px)); padding: 10px 30px 10px 12px; border-radius: 10px;
-  border: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 78%, transparent); backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px); box-shadow: 0 4px 18px rgb(0 0 0 / .12); font-size: 13px; line-height: 1.4; display: grid; gap: 3px; }
-.npop b { font-size: 14px; font-weight: 600; }
-.npop .m { color: var(--muted); }
-.npop a { color: var(--accent); }
-.npop button { position: absolute; top: 4px; right: 4px; border: 0; background: none; color: var(--muted); font-size: 18px; line-height: 1; padding: 4px 6px; cursor: pointer; }
+.npop { position: absolute; z-index: 4; pointer-events: none; padding: 2px 7px; border-radius: 6px; font-size: 12px; font-weight: 600;
+  white-space: nowrap; border: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 45%, transparent); color: var(--fg); }
+.ndet { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 4px; font-size: 14px; }
+.ndet b { font-size: 15px; font-weight: 600; }
+.ndet .m { color: var(--muted); }
+.ndet a { color: var(--accent); justify-self: start; }
+.ndet button { justify-self: start; font: inherit; font-size: 13px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--fg); cursor: pointer; margin-top: 4px; }
 .ctl a { font-size: 14px; color: var(--accent); }
 .ctl label { display: inline-flex; gap: 6px; align-items: center; font-size: 14px; color: var(--muted); }
 .ctl button { font: inherit; font-size: 14px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--fg); cursor: pointer; }
@@ -143,6 +143,7 @@ footer { color: var(--muted); font-size: 12px; }
       </div>
       <div class="legend" id="n-legend"></div>
       <div class="net" id="net"><canvas id="n-canvas" role="img"></canvas></div>
+      <div class="ndet" id="n-detail" aria-live="polite"><span class="m">Click a work to see only its citation links and its details here.</span></div>
     </div>
   </section>
 
@@ -415,7 +416,7 @@ let NET = null;
 function drawNetwork() {
   const N = D.network, box = document.getElementById('net'), cv = document.getElementById('n-canvas');
   if (!NET) {
-    const nodes = N.nodes.map(([x, y, k, c, yr, f, ti, url, au], i) => ({i, x, y, k, c, yr, f, ti, url, au, nb: []}));
+    const nodes = N.nodes.map(([x, y, k, c, yr, f, ti, url, au, fa], i) => ({i, x, y, k, c, yr, f, ti, url, au, fa, nb: []}));
     const L = N.links;
     for (let i = 0; i < L.length; i += 2) { nodes[L[i]].nb.push(L[i + 1]); nodes[L[i + 1]].nb.push(L[i]); }
     const area = new Map(D.topics.map((t) => [t.topic, t.area]));
@@ -424,12 +425,12 @@ function drawNetwork() {
       ...(M.highlighted ? [el('span', {}, (() => { const d = el('i', {class: 'dot'}); d.style.background = 'transparent'; d.style.boxShadow = 'inset 0 0 0 2px var(--fg)'; return d; })(), M.highlight_label)] : []));
     document.getElementById('n-note').textContent = `Each dot is one of the ${fmt(nodes.length)} works with a citation link, sized by its citations and coloured by its area; `
       + `${fmt(L.length / 2)} lines are the citation links. Each cluster holds the works of one topic, laid out by the links among them and labelled with the topic's name; clusters with more links between them sit closer`
-      + `${M.highlighted ? `; ringed dots are ${M.highlight_label.toLowerCase()}` : ''}. Scroll or pinch to zoom, drag to move, point at a dot for the work, click it to show only its citation links and its details.`;
+      + `${M.highlighted ? `; ringed dots are ${M.highlight_label.toLowerCase()}` : ''}. Scroll or pinch to zoom, drag to move, point at a dot for the work, click it to show only its citation links, with its details below the graph.`;
     if (M.vosviewer) { const a = document.getElementById('n-vos'); a.href = M.vosviewer; a.hidden = false; }
     const sel = document.getElementById('n-topic');
     sel.replaceChildren(el('option', {value: ''}, 'All topics'), ...D.topics.map((t) => el('option', {value: t.topic}, `${t.topic}. ${t.name}`)));
     NET = {nodes, L, area, focus: null, hover: null, sel: null, k: d3.zoomIdentity};
-    NET.pop = el('div', {class: 'npop', hidden: '', role: 'dialog', 'aria-label': 'Selected work'});
+    NET.pop = el('div', {class: 'npop', hidden: '', 'aria-hidden': 'true'});
     box.append(NET.pop);
     addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && NET.sel) NET.select(null); });
     sel.onchange = () => { NET.focus = sel.value === '' ? null : +sel.value; NET.paint(); };
@@ -483,7 +484,7 @@ function drawNetwork() {
     ctx.lineJoin = 'round'; ctx.lineWidth = 4; ctx.strokeStyle = panel; ctx.fillStyle = fg;
     const placed = [], max = W < 600 ? 22 : 34;
     for (const l of labels) {
-      if ((NET.focus != null && l.k !== NET.focus) || (S && l.k !== S.k)) continue;
+      if (NET.focus != null && l.k !== NET.focus) continue;
       const x = t.applyX(l.x);
       const words = l.name.split(' '), lines = [''];
       for (const w of words) { const c = lines[lines.length - 1]; if (c && (c + ' ' + w).length > max) lines.push(w); else lines[lines.length - 1] = c ? c + ' ' + w : w; }
@@ -500,16 +501,21 @@ function drawNetwork() {
   function placePop() {
     const p = NET.pop, S = NET.sel, x = NET.k.applyX(S.bx), y = NET.k.applyY(S.by);
     const w = p.offsetWidth, h = p.offsetHeight;
-    p.style.left = `${Math.max(8, Math.min(x + 14 + w > W - 8 ? x - 14 - w : x + 14, W - w - 8))}px`;
-    p.style.top = `${Math.max(8, Math.min(y - h / 2, H - h - 8))}px`;
+    p.style.left = `${Math.max(4, Math.min(x + 8 + w > W - 4 ? x - 8 - w : x + 8, W - w - 4))}px`;
+    p.style.top = `${Math.max(4, Math.min(y - h - 6, H - h - 4))}px`;
   }
   function select(d) {
     NET.sel = d;
-    const p = NET.pop;
-    if (!d) { p.hidden = true; NET.paint(); return; }
-    const close = el('button', {type: 'button', 'aria-label': 'Close'}, '×');
-    close.onclick = () => select(null);
-    const kids = [close, el('b', {}, d.ti || 'Untitled')];
+    const p = NET.pop, det = document.getElementById('n-detail');
+    if (!d) {
+      p.hidden = true;
+      det.replaceChildren(el('span', {class: 'm'}, 'Click a work to see only its citation links and its details here.'));
+      NET.paint();
+      return;
+    }
+    p.textContent = d.fa || (d.ti || 'Untitled').slice(0, 30);
+    p.hidden = false;
+    const kids = [el('b', {}, d.ti || 'Untitled')];
     if (d.au) kids.push(el('span', {}, d.au));
     kids.push(el('span', {class: 'm'}, [d.yr, `${fmt(d.c)} citations`, `${fmt(d.nb.length)} citation links here`, d.f ? M.highlight_label : null].filter(Boolean).join(' · ')));
     kids.push(el('span', {class: 'm'}, tname(d.k)));
@@ -517,8 +523,10 @@ function drawNetwork() {
       const host = (() => { try { return new URL(d.url).hostname; } catch (e) { return ''; } })();
       kids.push(el('a', {href: d.url, target: '_blank', rel: 'noopener'}, host.includes('inspirehep') ? 'Open in INSPIRE ↗' : `Open ${host || 'link'} ↗`));
     }
-    p.replaceChildren(...kids);
-    p.hidden = false;
+    const clear = el('button', {type: 'button'}, 'Clear selection');
+    clear.onclick = () => select(null);
+    kids.push(clear);
+    det.replaceChildren(...kids);
     tp.hide();
     NET.paint();
   }

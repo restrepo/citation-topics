@@ -135,8 +135,8 @@ areas, in about a minute; the result is the [sample board](https://restrepo.gith
      Unnamed topics are shown as "Topic N".
 
 6. **Board:** one page with the map and table of topics, works per year, a searchable list of works, the network
-   of works with one labelled cluster per topic (click a work to see only its citation links, its authors and its
-   INSPIRE link), and a tab with the author's own papers by topic:
+   of works with one labelled cluster per topic (click a work to see only its citation links, its first author beside it,
+   and its authors, year, citations and INSPIRE link below the graph), and a tab with the author's own papers by topic:
 
    ```bash
    citation-topics board works.jsonl out/ --highlight own --highlight-label "Your papers" --title "Your name: citation topics"

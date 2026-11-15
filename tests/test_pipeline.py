@@ -7,7 +7,7 @@ import pytest
 from citation_topics.board import board
 from citation_topics.compare import agreement, compare
 from citation_topics.describe import describe, terms_of
-from citation_topics.export import _authors, export_csv, export_vosviewer, export_works_vosviewer
+from citation_topics.export import _authors, _first_author, export_csv, export_vosviewer, export_works_vosviewer
 from citation_topics.io import Fields, as_list, as_year, iter_works
 from citation_topics.names import apply_names
 from citation_topics.network import build
@@ -262,3 +262,12 @@ def test_author_line():
     assert _authors(f, {"authors": ["A", "B", "C", "D"], "author_count": 87}) == "A; B; C et al. (87 authors)"
     assert _authors(f, {"collaborations": ["LHCb"], "author_count": 900}) == "LHCb Collaboration (900 authors)"
     assert _authors(f, {"title": "x"}) is None
+
+
+def test_first_author():
+    f = Fields()
+    assert _first_author(f, {"authors": ["Nath, Pran", "B"]}) == "Nath, P."
+    assert _first_author(f, {"authors": ["Pran Nath"]}) == "Nath, P."
+    assert _first_author(f, {"authors": ["Morales-Alvarado, Manuel"]}) == "Morales-Alvarado, M."
+    assert _first_author(f, {"collaborations": ["LHCb"]}) == "LHCb"
+    assert _first_author(f, {}) is None

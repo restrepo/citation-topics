@@ -7,9 +7,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ### Added
 - `board`: a Network tab when the list has at most `--network-max` works (10,000): every work with a citation
   link, each topic its own cluster labelled with its name, coloured by area; zoom, hover and topic focus.
-  `--vosviewer-url` links it to VOSviewer Online. Clicking a work shows only its citation links and a small
-  card with its title, authors (optional fields `authors`, `author_count`, `collaborations`), year, citations,
-  topic and link.
+  `--vosviewer-url` links it to VOSviewer Online. Clicking a work shows only its citation links, its first author
+  ("Last, I.") in a see-through label beside it, and its title, authors (optional fields `authors`,
+  `author_count`, `collaborations`), year, citations, topic and link in a box below the graph; the topic labels
+  stay.
 - `export --works INPUT`: `works_vosviewer.json`, the network of works for VOSviewer with the board's positions and
   one named cluster per topic and the authors in each work's description.
 - `examples/inspire_profile.py` also writes `authors` (the first 10), `author_count` and `collaborations`.
