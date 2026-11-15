@@ -214,6 +214,22 @@ def _authors(fields, w, show=3):
     return line or None
 
 
+def _first_author(fields, w):
+    """First author as "Last, I." ("Nath, Pran" and "Pran Nath" give "Nath, P."), else the first collaboration;
+    None when the work has neither."""
+    names = [str(x).strip() for x in as_list(fields.get(w, "authors")) if isinstance(x, (str, int)) and str(x).strip()]
+    if names:
+        last, _, first = (
+            names[0].partition(",")
+            if "," in names[0]
+            else (names[0].rpartition(" ")[2], "", names[0].rpartition(" ")[0])
+        )
+        first = first.strip()
+        return f"{last.strip()}, {first[0]}." if first else last.strip()
+    collab = [str(x) for x in as_list(w.get("collaborations")) if x]
+    return collab[0] if collab else None
+
+
 def _html(s):
     return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
