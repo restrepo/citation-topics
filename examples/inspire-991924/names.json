@@ -1,0 +1,17 @@
+{"topics": {
+ "0": {"name": "R-parity violating supersymmetry and neutrino masses", "reason": "terms r-parity violation, bilinear, supersymmetry; 'R-parity violating supersymmetry', SPheno; keyword neutrino: mass"},
+ "1": {"name": "Scotogenic and radiative neutrino mass models", "reason": "terms scotogenic, radiative seesaw, inert, lepton flavor; 'review of radiative neutrino mass models', 'LFV in the Scotogenic Model'"},
+ "2": {"name": "DUNE and liquid-argon neutrino experiments", "reason": "terms liquid argon, LArTPC, DUNE, time projection chamber; hep-ex and physics.ins-det, JINST"},
+ "3": {"name": "Supersymmetry and new physics at the LHC and ILC", "reason": "terms LHC, TeV, discovery, supergravity parameter space; ATLAS expected performance, LHC/ILC interplay, CLIC report"},
+ "4": {"name": "Seesaw models: Higgs triplets, majorons and sterile neutrinos", "reason": "terms seesaw, Higgs triplet, doubly charged, majoron, sterile; Leptogenesis, SHiP, keV sterile neutrino dark matter"},
+ "5": {"name": "Singlet-doublet and scalar dark matter: relic density and detection", "reason": "terms singlet-doublet, relic density, direct detection, gamma-ray excess; 'The waning of the WIMP?'"},
+ "6": {"name": "Extra gauge symmetries: 3-3-1 and Z' models and muon g-2", "reason": "terms SU(3)xSU(3)xU(1), gauge boson, flavor-changing neutral currents; 'The Muon g-2', 'Z' models for LHCb and g-2'"},
+ "7": {"name": "Dirac neutrino masses and N_eff", "reason": "terms Dirac neutrino, Dirac seesaw, Dirac scotogenic, Neff; 'Dirac neutrinos and N_eff', 'Dark matter stability and Dirac neutrinos'"},
+ "8": {"name": "LHC searches: vector-boson fusion, Higgs portal and lepton universality", "reason": "terms VBF, vector boson fusion, LFU, semileptonic b decays; Higgs cross sections handbook, Higgs portal dark matter; 39% hep-ex"},
+ "9": {"name": "Decaying gravitino dark matter and cosmic rays", "reason": "terms gravitino dark matter, gravitino lifetime, Fermi LAT, positron spectrum; 'Indirect searches for decaying dark matter'"},
+ "10": {"name": "LHC diboson excess, SO(10) and left-right models", "reason": "terms diboson excess, SO(10), left-right model, D-parity, coupling unification; 'diboson excesses at the LHC'"}},
+ "areas": {
+ "0": {"name": "Neutrino mass models, dark matter and new gauge symmetries", "reason": "topics 1, 4, 5, 6, 7, 8, 10; terms scotogenic, dark matter, seesaw, symmetry"},
+ "1": {"name": "Supersymmetry: R-parity violation, LHC and gravitino dark matter", "reason": "topics 0, 3, 9; terms r-parity violation, bilinear, supersymmetry"},
+ "2": {"name": "Neutrino experiments: DUNE and liquid argon", "reason": "topic 2 only; terms liquid argon, DUNE"}},
+ "meta": {"by": "topic-namer skill (Claude in Claude Code)", "model": "claude-opus-5-5", "date": "2026-11-15"}}
