@@ -1,4 +1,5 @@
-"""Research topics and areas from the citation links of any list of works, with Leiden clustering as CWTS does for OpenAlex."""
+"""Research topics and areas from the citation links of any list of works, with Leiden clustering as CWTS does
+for the OpenAlex topics."""
 
 from importlib.metadata import PackageNotFoundError, version
 
