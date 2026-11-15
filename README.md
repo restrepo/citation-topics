@@ -45,7 +45,7 @@ A JSON array or JSON Lines file (optionally gzipped), one object per work:
 | `title`, `abstract`, `keywords`, `journal`, `categories` | the description of each topic (`describe`), hence its name |
 | `citations` | most cited works by that count (otherwise by citations inside the list) |
 | `countries` | countries of each topic in the description |
-| `authors` | the Authors tab of the board |
+| `authors` | the Authors tab of the board, and the authors of each work in the Network tab and in `works_vosviewer.json` (with `author_count` and `collaborations`, when present, for long author lists) |
 | `url` | links from the board and the description to each work |
 | any true/false field, e.g. `own` | a tab of the board that follows those works (`board --highlight own`) |
 
@@ -94,7 +94,8 @@ areas, in about a minute; the result is the [sample board](https://restrepo.gith
    ```
 
    It writes, for each paper, its references, year, title, abstract, keywords, journal, arXiv categories,
-   citation count and link, and `"own": true` for the author's papers.
+   authors (the first 10, with the author count and collaboration), citation count and link, and `"own": true`
+   for the author's papers.
 
 3. **Topics.** A list of about 2,000 works needs smaller topics than the defaults, which suit millions of works:
 
@@ -134,7 +135,8 @@ areas, in about a minute; the result is the [sample board](https://restrepo.gith
      Unnamed topics are shown as "Topic N".
 
 6. **Board:** one page with the map and table of topics, works per year, a searchable list of works, the network
-   of works with one labelled cluster per topic, and a tab with the author's own papers by topic:
+   of works with one labelled cluster per topic (click a work to see only its citation links, its authors and its
+   INSPIRE link), and a tab with the author's own papers by topic:
 
    ```bash
    citation-topics board works.jsonl out/ --highlight own --highlight-label "Your papers" --title "Your name: citation topics"

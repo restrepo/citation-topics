@@ -7,7 +7,7 @@ import pytest
 from citation_topics.board import board
 from citation_topics.compare import agreement, compare
 from citation_topics.describe import describe, terms_of
-from citation_topics.export import export_csv, export_vosviewer, export_works_vosviewer
+from citation_topics.export import _authors, export_csv, export_vosviewer, export_works_vosviewer
 from citation_topics.io import Fields, as_list, as_year, iter_works
 from citation_topics.names import apply_names
 from citation_topics.network import build
@@ -254,3 +254,11 @@ def test_network_and_works_vosviewer(works_file, run_out):
     assert {"x", "y", "label", "description"} <= first.keys() and "Year" in first["scores"]
     assert export_works_vosviewer(works_file, run_out, network_max=10, **QUIET) is None
     assert "network" not in board(works_file, run_out, network_max=10, **QUIET)
+
+
+def test_author_line():
+    f = Fields()
+    assert _authors(f, {"authors": ["A", "B"]}) == "A; B"
+    assert _authors(f, {"authors": ["A", "B", "C", "D"], "author_count": 87}) == "A; B; C et al. (87 authors)"
+    assert _authors(f, {"collaborations": ["LHCb"], "author_count": 900}) == "LHCb Collaboration (900 authors)"
+    assert _authors(f, {"title": "x"}) is None

@@ -24,7 +24,7 @@ from urllib.parse import quote
 import numpy as np
 
 from . import __version__
-from .export import VOSVIEWER_ONLINE
+from .export import VOSVIEWER_ONLINE, _authors
 from .io import Fields, as_list, as_year, iter_works
 from .layout import work_positions
 from .run import load
@@ -101,6 +101,7 @@ def board(
                 int(T2[i, 1]) if T2[i, 1] >= 0 else None,
                 fields.get(w, "url"),
                 flag,
+                _authors(fields, w),
             ]
         )
     total_works = len(works)
@@ -201,7 +202,7 @@ def _network(net, topic, info, flags, seed=1):
     ]
     nodes = []
     for j, i in enumerate(linked):
-        r = info.get(net.ids[i]) or [net.ids[i], None, None, 0, None, None, None, False]
+        r = info.get(net.ids[i]) or [net.ids[i], None, None, 0, None, None, None, False, None]
         title = r[1] if isinstance(r[1], str) else ""
         nodes.append(
             [
@@ -213,6 +214,7 @@ def _network(net, topic, info, flags, seed=1):
                 1 if flags.get(net.ids[i]) else 0,
                 title[:140],
                 r[6] if isinstance(r[6], str) else None,
+                r[8],
             ]
         )
     return {"nodes": nodes, "links": np.column_stack([a, b]).ravel().tolist(), "labels": labels}
