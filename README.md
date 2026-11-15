@@ -1,6 +1,8 @@
 # citation-topics
 
 [![CI](https://github.com/restrepo/citation-topics/actions/workflows/ci.yml/badge.svg)](https://github.com/restrepo/citation-topics/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/citation-topics.svg)](https://pypi.org/project/citation-topics/)
+[![Python](https://img.shields.io/pypi/pyversions/citation-topics.svg)](https://pypi.org/project/citation-topics/)
 
 Research topics and broad areas for any list of works (papers, theses, projects, patents) from their citation
 links, with Leiden clustering of the direct-citation network as CWTS does for the OpenAlex topics. It also gives
@@ -11,10 +13,11 @@ It was extracted from [restrepo/inspireauth10](https://github.com/restrepo/inspi
 million INSPIRE-HEP papers into 304 topics and 6 areas
 ([how the topics are made](https://restrepo.github.io/inspireauth10/leiden.html)).
 
-Status: first version, not yet on PyPI. Install from a clone:
+## Install
 
 ```bash
-pip install -e .
+pip install citation-topics
+citation-topics --help
 ```
 
 ## Input
