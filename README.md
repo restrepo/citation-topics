@@ -60,6 +60,70 @@ citation-topics skills install                     # Claude skills and the topic
 (stops early when the quality stops rising), `--seed 1`, `--area-resolution 0.3`, `--area-seeds 50` (the best
 of that many runs). Tune them for other lists; the skill `topics-run` explains how.
 
+## Example: the citation community of an INSPIRE-HEP profile
+
+The topics of an author's papers together with every paper citing them. Tried on
+[Diego Restrepo's profile](https://inspirehep.net/authors/991924): 79 papers and 1,939 citing papers, 1,967 works,
+11 topics in 3 areas, in about a minute.
+
+1. **Install** (Python 3.10 or newer):
+
+   ```bash
+   pip install citation-topics
+   curl -O https://raw.githubusercontent.com/restrepo/citation-topics/main/examples/inspire_profile.py
+   ```
+
+2. **Get the works** from INSPIRE, with the number of the profile (`https://inspirehep.net/authors/991924`)
+   or its INSPIRE BAI (`D.Restrepo.1`):
+
+   ```bash
+   python inspire_profile.py 991924 works.jsonl
+   ```
+
+   It writes, for each paper, its references, year, title, abstract, keywords, journal, arXiv categories,
+   citation count and link, and `"own": true` for the author's papers.
+
+3. **Topics.** A list of about 2,000 works needs smaller topics than the defaults, which suit millions of works:
+
+   ```bash
+   citation-topics run works.jsonl out/ --resolution 1 --min-size 20
+   ```
+
+   Try two or three resolutions (for example 1, 2, 4) and keep the one whose topics are solid (`share_inside` in
+   `out/topics.json`) and readable in number. Optionally run seeds 1 to 4 into different folders and keep the
+   one `citation-topics agreement` calls the medoid.
+
+4. **Describe and export:**
+
+   ```bash
+   citation-topics describe works.jsonl out/ --abstracts
+   citation-topics export out/
+   ```
+
+5. **Name the topics**, with or without Claude:
+
+   - *With Claude Desktop (optional; the Code tab, or Claude Code):* install the skills in the folder, open the
+     folder in the Code tab and ask, for example, "name the topics in out/ with the topic-namer skill". Claude reads
+     `out/dossier.json`, writes `names.json` with a name and a reason for every topic and area, and applies it.
+
+     ```bash
+     citation-topics skills install
+     ```
+
+   - *Without Claude:* read `out/dossier.json` (distinctive terms, most cited titles, journals and categories of
+     each topic), write `names.json` yourself in the format of the `names` command, and apply it:
+
+     ```bash
+     citation-topics names out/ names.json
+     citation-topics export out/
+     ```
+
+     Unnamed topics are shown as "Topic N".
+
+6. **Look at the map:** open `out/topics_vosviewer.json` in [VOSviewer Online](https://app.vosviewer.com/)
+   (Open → the file) or in VOSviewer. Each topic is a circle sized by its works and coloured by its area; the
+   author's papers per topic are those with `"own": true` in `works.jsonl` joined to `out/works.jsonl.gz` by `id`.
+
 ## Method
 
 1. **Network**: one node per work, an edge for each reference to another work of the list; undirected, each
