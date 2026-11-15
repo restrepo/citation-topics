@@ -4,6 +4,7 @@ import json
 import numpy as np
 import pytest
 
+from citation_topics.board import board
 from citation_topics.compare import agreement, compare
 from citation_topics.describe import describe, terms_of
 from citation_topics.export import export_csv, export_vosviewer
@@ -188,3 +189,43 @@ def test_exports(run_out):
     with gzip.open(run_out / "works_topics.csv.gz", "rt") as f:
         rows = list(f)
     assert rows[0].startswith("id,topic_1,score_1") and len(rows) == 1 + 4 * SIZE
+
+
+def _board_data(path):
+    html = path.read_text()
+    start = html.index("const D = ") + len("const D = ")
+    return json.loads(html[start : html.index(";\nconst M = D.meta;")].replace("<\\/", "</"))
+
+
+def test_board_tabs_follow_the_fields(works_file, run_out, tmp_path):
+    tabs = board(works_file, run_out, highlight="own", **QUIET)
+    assert tabs == ["overview", "timeline", "works", "countries", "about"]  # no work has own: no highlight tab
+    d = _board_data(run_out / "board.html")
+    assert len(d["topics"]) == 4 and d["meta"]["works_listed"] == d["meta"]["works_total"] == 4 * SIZE + 1
+    assert d["countries"][0][0] == "Colombia" and "</script" not in json.dumps(d)
+    bare = tmp_path / "bare.json"
+    bare.write_text(json.dumps([{"id": w["id"], "references": w["references"]} for w in planted()]))
+    run(bare, tmp_path / "b", **QUIET, **PARAMS)
+    assert board(bare, tmp_path / "b", html=tmp_path / "b.html", **QUIET) == ["overview", "about"]
+
+
+def test_board_highlight_and_limit(tmp_path):
+    ws = planted()
+    for i, w in enumerate(ws):
+        w["own"] = i % 50 == 0
+        w["authors"] = [f"A{i % 7}"]
+        w["title"] = (w.get("title") or "") + " </script><b>x</b>"
+    p = tmp_path / "w.json"
+    p.write_text(json.dumps(ws))
+    run(p, tmp_path / "o", **QUIET, **PARAMS)
+    tabs = board(p, tmp_path / "o", highlight="own", highlight_label="Own", max_works=5, **QUIET)
+    assert "highlight" in tabs and "authors" in tabs
+    html = (tmp_path / "o" / "board.html").read_text()
+    assert html.count("</script>") == 2  # the d3 tag and the page script: titles cannot close it
+    d = _board_data(tmp_path / "o" / "board.html")
+    own = sum(1 for w in ws if w["own"])
+    assert (
+        d["meta"]["highlighted"] == own
+        and d["meta"]["works_listed"] == 5 + sum(1 for r in d["works"][5:] if r[7])
+        and sum(r[7] for r in d["works"]) == own
+    )

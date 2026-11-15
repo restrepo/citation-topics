@@ -35,6 +35,8 @@ def test_cli_end_to_end(works_file, tmp_path):
     assert main(["names", str(out), str(names), "-q"]) == 0
     assert main(["export", str(out), "-q"]) == 0
     assert (out / "topics_vosviewer.json").exists() and (out / "topics.csv").exists()
+    assert main(["board", str(works_file), str(out), "--title", "T", "-q"]) == 0
+    assert "<title>T</title>" in (out / "board.html").read_text()
     assert main(["run", str(works_file), str(tmp_path / "old"), "--to-year", "2009", *args]) == 0
     assert main(["compare", str(tmp_path / "old"), str(out), str(tmp_path / "cmp"), "-q"]) == 0
     assert json.loads((tmp_path / "cmp" / "flows.json").read_text())["meta"]["works_in_both"] > 0
@@ -47,7 +49,8 @@ def test_cli_map_error(works_file, tmp_path):
 
 def test_skills(tmp_path, capsys):
     names = [n for n, _ in list_skills()]
-    assert {"skill topics-run", "skill topic-namer", "skill topics-compare", "agent topic-namer"} <= set(names)
+    want = {"skill topics-run", "skill topic-namer", "skill topics-compare", "skill topics-board", "agent topic-namer"}
+    assert want <= set(names)
     assert main(["skills", "install", "--dest", str(tmp_path / ".claude")]) == 0
     assert (tmp_path / ".claude" / "skills" / "topic-namer" / "SKILL.md").exists()
     assert (tmp_path / ".claude" / "agents" / "topic-namer.md").exists()
