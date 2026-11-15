@@ -7,7 +7,7 @@ import pytest
 from citation_topics.board import board
 from citation_topics.compare import agreement, compare
 from citation_topics.describe import describe, terms_of
-from citation_topics.export import export_csv, export_vosviewer
+from citation_topics.export import export_csv, export_vosviewer, export_works_vosviewer
 from citation_topics.io import Fields, as_list, as_year, iter_works
 from citation_topics.names import apply_names
 from citation_topics.network import build
@@ -199,7 +199,7 @@ def _board_data(path):
 
 def test_board_tabs_follow_the_fields(works_file, run_out, tmp_path):
     tabs = board(works_file, run_out, highlight="own", **QUIET)
-    assert tabs == ["overview", "timeline", "works", "countries", "about"]  # no work has own: no highlight tab
+    assert tabs == ["overview", "timeline", "works", "network", "countries", "about"]  # no own: no highlight tab
     d = _board_data(run_out / "board.html")
     assert len(d["topics"]) == 4 and d["meta"]["works_listed"] == d["meta"]["works_total"] == 4 * SIZE + 1
     assert d["countries"][0][0] == "Colombia" and "</script" not in json.dumps(d)
@@ -208,7 +208,7 @@ def test_board_tabs_follow_the_fields(works_file, run_out, tmp_path):
     bare = tmp_path / "bare.json"
     bare.write_text(json.dumps([{"id": w["id"], "references": w["references"]} for w in planted()]))
     run(bare, tmp_path / "b", **QUIET, **PARAMS)
-    assert board(bare, tmp_path / "b", html=tmp_path / "b.html", **QUIET) == ["overview", "about"]
+    assert board(bare, tmp_path / "b", html=tmp_path / "b.html", network_max=0, **QUIET) == ["overview", "about"]
 
 
 def test_board_highlight_and_limit(tmp_path):
@@ -231,3 +231,26 @@ def test_board_highlight_and_limit(tmp_path):
         and d["meta"]["works_listed"] == 5 + sum(1 for r in d["works"][5:] if r[7])
         and sum(r[7] for r in d["works"]) == own
     )
+
+
+def test_network_and_works_vosviewer(works_file, run_out):
+    board(works_file, run_out, vosviewer_url="https://example.org/w.json", **QUIET)
+    d = _board_data(run_out / "board.html")
+    net = d["network"]
+    xy = np.array([n[:2] for n in net["nodes"]])
+    assert len(net["nodes"]) == 4 * SIZE and xy.min() >= 0 and xy.max() <= 1000.01  # the isolated work is left out
+    assert sorted(lab[0] for lab in net["labels"]) == [0, 1, 2, 3]
+    centre = {k: xy[[n[2] == k for n in net["nodes"]]].mean(0) for k in range(4)}
+    spread = max(np.linalg.norm(xy[[n[2] == k for n in net["nodes"]]] - centre[k], axis=1).max() for k in range(4))
+    gap = min(np.linalg.norm(centre[i] - centre[j]) for i in range(4) for j in range(i))
+    assert gap > spread  # every topic is its own cluster
+    assert d["meta"]["vosviewer"] == "https://app.vosviewer.com/?json=https%3A%2F%2Fexample.org%2Fw.json"
+    path = export_works_vosviewer(works_file, run_out, highlight="own", **QUIET)
+    v = json.loads(path.read_text())
+    items = {it["id"]: it for it in v["network"]["items"]}
+    assert len(items) == 4 * SIZE and len(v["network"]["links"]) == d["meta"]["links"]
+    assert {it["cluster"] for it in items.values()} == {1, 2, 3, 4} and len(v["network"]["clusters"]) == 4
+    first = next(iter(items.values()))
+    assert {"x", "y", "label", "description"} <= first.keys() and "Year" in first["scores"]
+    assert export_works_vosviewer(works_file, run_out, network_max=10, **QUIET) is None
+    assert "network" not in board(works_file, run_out, network_max=10, **QUIET)

@@ -5,6 +5,8 @@ Tabs, and what each needs:
   Overview    always: headline figures, the map of topics, the table of topics
   Timeline    year: works per topic and year
   Works       title: searchable table of the most cited works with topic and second topic
+  Network     at most --network-max works (10,000): every work with a citation link, each topic a cluster of
+              its works labelled with its name, coloured by area
   Highlight   --highlight FIELD: the works where FIELD is true (an author's own papers, a group's works...)
   Countries   countries: share of each topic's works by country
   Authors     authors: the authors with most works in each topic
@@ -17,11 +19,14 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from importlib.resources import files
 from pathlib import Path
+from urllib.parse import quote
 
 import numpy as np
 
 from . import __version__
+from .export import VOSVIEWER_ONLINE
 from .io import Fields, as_list, as_year, iter_works
+from .layout import work_positions
 from .run import load
 
 
@@ -34,6 +39,8 @@ def board(
     highlight_label="Highlighted works",
     title=None,
     max_works=5000,
+    network_max=10000,
+    vosviewer_url=None,
     log=print,
 ):
     fields = fields or Fields()
@@ -105,6 +112,12 @@ def board(
         tabs.append("timeline")
     if seen["title"]:
         tabs.append("works")
+    network = None
+    if 0 < net.n <= network_max:
+        tabs.append("network")
+        flags = {r[0]: r[7] for r in works}
+        info = {r[0]: r for r in works}
+        network = _network(net, topic, info, flags)
     if highlight and seen["highlight"]:
         tabs.append("highlight")
     if seen["countries"]:
@@ -154,6 +167,7 @@ def board(
             "versions": meta_run.get("versions"),
             "names": meta_run.get("names"),
             "input": meta_run.get("input"),
+            "vosviewer": VOSVIEWER_ONLINE + quote(vosviewer_url, safe="") if vosviewer_url and network else None,
         },
         "topics": trows,
         "links": links,
@@ -161,6 +175,7 @@ def board(
         "works": keep,
         "countries": [[c, [[k, n] for k, n in sorted(country_topic[c].items())]] for c in top_countries],
         "authors": {str(k): v.most_common(10) for k, v in author_topic.items()},
+        "network": network,
     }
     tpl = (files("citation_topics") / "board_template.html").read_text(encoding="utf-8")
     page = tpl.replace("__TITLE__", _esc(data["meta"]["title"])).replace(
@@ -170,6 +185,37 @@ def board(
     html.write_text(page, encoding="utf-8")
     log(f"board with tabs {', '.join(tabs)} -> {html} ({html.stat().st_size / 1e6:.1f} MB)")
     return tabs
+
+
+def _network(net, topic, info, flags, seed=1):
+    """Every work with a citation link, placed so that each topic is its own cluster (layout.py), the links among
+    them and where to label each topic."""
+    pos = work_positions(net, topic, seed)
+    if pos is None:
+        return None
+    linked, xy, a, b = pos
+    t = topic[linked]
+    labels = [  # topic, x of its centre, y just above and just below its works
+        [int(k), *(round(float(v), 1) for v in (np.median(xy[t == k, 0]), *np.quantile(xy[t == k, 1], [0.03, 0.97])))]
+        for k in np.unique(t[t >= 0])
+    ]
+    nodes = []
+    for j, i in enumerate(linked):
+        r = info.get(net.ids[i]) or [net.ids[i], None, None, 0, None, None, None, False]
+        title = r[1] if isinstance(r[1], str) else ""
+        nodes.append(
+            [
+                round(float(xy[j, 0]), 1),
+                round(float(xy[j, 1]), 1),
+                int(t[j]) if t[j] >= 0 else None,
+                r[3],
+                r[2],
+                1 if flags.get(net.ids[i]) else 0,
+                title[:140],
+                r[6] if isinstance(r[6], str) else None,
+            ]
+        )
+    return {"nodes": nodes, "links": np.column_stack([a, b]).ravel().tolist(), "labels": labels}
 
 
 def _esc(s):

@@ -10,8 +10,12 @@ each work a second and a third topic, describes every topic from whatever the in
 keywords, journals, categories, countries), and ships Claude skills and an agent that name the topics.
 
 It was extracted from [restrepo/inspireauth10](https://github.com/restrepo/inspireauth10), where it groups 1.9
-million INSPIRE-HEP papers into 304 topics and 6 areas
-([how the topics are made](https://restrepo.github.io/inspireauth10/leiden.html)).
+million INSPIRE-HEP papers into 304 topics and 6 areas.
+
+- [How the topics are made](https://restrepo.github.io/citation-topics/leiden.html): the method, step by step.
+- [Sample board](https://restrepo.github.io/citation-topics/examples/inspire-991924/): the citation community of
+  the INSPIRE-HEP author 991924, and the same network of works
+  [in VOSviewer Online](https://app.vosviewer.com/?json=https%3A%2F%2Frestrepo.github.io%2Fcitation-topics%2Fexamples%2Finspire-991924%2Fworks_vosviewer.json).
 
 ## Install
 
@@ -56,7 +60,8 @@ so a list can carry them from the start for a later board.
 citation-topics run works.jsonl.gz out/            # network, topics, areas, second and third topics
 citation-topics describe works.jsonl.gz out/       # out/dossier.json: what each topic is about
 citation-topics names out/ names.json              # put names into topics.json and areas.json
-citation-topics export out/                        # VOSviewer JSON and map/network files, CSVs
+citation-topics export out/                        # VOSviewer files of the topics, CSVs
+citation-topics export out/ --works works.jsonl.gz # also the network of works for VOSviewer (up to 10,000 works)
 citation-topics board works.jsonl.gz out/          # out/board.html: tabs for what the fields allow
 citation-topics agreement out_s1/ out_s2/ ...      # NMI/ARI between seeds, and the medoid to keep
 citation-topics compare old/ new/ cmp/             # where earlier topics went; names carried over
@@ -70,9 +75,9 @@ of that many runs). Tune them for other lists; the skill `topics-run` explains h
 
 ## Example: the citation community of an INSPIRE-HEP profile
 
-The topics of an author's papers together with every paper citing them. Tried on
-[Diego Restrepo's profile](https://inspirehep.net/authors/991924): 79 papers and 1,939 citing papers, 1,967 works,
-11 topics in 3 areas, in about a minute.
+The topics of an author's papers together with every paper citing them. Tried on the INSPIRE-HEP author
+[991924](https://inspirehep.net/authors/991924): 79 papers and 1,888 citing papers, 1,967 works, 11 topics in 3
+areas, in about a minute; the result is the [sample board](https://restrepo.github.io/citation-topics/examples/inspire-991924/).
 
 1. **Install** (Python 3.10 or newer):
 
@@ -82,7 +87,7 @@ The topics of an author's papers together with every paper citing them. Tried on
    ```
 
 2. **Get the works** from INSPIRE, with the number of the profile (`https://inspirehep.net/authors/991924`)
-   or its INSPIRE BAI (`D.Restrepo.1`):
+   or its INSPIRE BAI:
 
    ```bash
    python inspire_profile.py 991924 works.jsonl
@@ -105,7 +110,7 @@ The topics of an author's papers together with every paper citing them. Tried on
 
    ```bash
    citation-topics describe works.jsonl out/ --abstracts
-   citation-topics export out/
+   citation-topics export out/ --works works.jsonl --highlight own --highlight-label "The author's papers"
    ```
 
 5. **Name the topics**, with or without Claude:
@@ -123,13 +128,13 @@ The topics of an author's papers together with every paper citing them. Tried on
 
      ```bash
      citation-topics names out/ names.json
-     citation-topics export out/
+     citation-topics export out/ --works works.jsonl --highlight own --highlight-label "The author's papers"
      ```
 
      Unnamed topics are shown as "Topic N".
 
-6. **Board:** one page with the map and table of topics, works per year, a searchable list of works and a tab
-   with the author's own papers by topic:
+6. **Board:** one page with the map and table of topics, works per year, a searchable list of works, the network
+   of works with one labelled cluster per topic, and a tab with the author's own papers by topic:
 
    ```bash
    citation-topics board works.jsonl out/ --highlight own --highlight-label "Your papers" --title "Your name: citation topics"
@@ -137,8 +142,16 @@ The topics of an author's papers together with every paper citing them. Tried on
 
    Open `out/board.html` in a browser, or ask Claude to publish it (skill `topics-board`).
 
-7. **VOSviewer (optional):** open `out/topics_vosviewer.json` in [VOSviewer Online](https://app.vosviewer.com/)
-   (Open → the file) or in VOSviewer.
+7. **VOSviewer (optional):** `out/works_vosviewer.json` is the network of works (one item per work, its topic as
+   the cluster, the board's positions) and `out/topics_vosviewer.json` the graph of topics. Open either in
+   [VOSviewer Online](https://app.vosviewer.com/) (Open → the file) or in VOSviewer. To share a link, put the file
+   at a public address that allows cross-site reads (GitHub Pages does) and open
+   `https://app.vosviewer.com/?json=` followed by its URL; `board --vosviewer-url URL` adds that link to the
+   board's Network tab. The sample:
+
+   ```text
+   https://app.vosviewer.com/?json=https%3A%2F%2Frestrepo.github.io%2Fcitation-topics%2Fexamples%2Finspire-991924%2Fworks_vosviewer.json
+   ```
 
 ## Method
 
@@ -155,7 +168,10 @@ The topics of an author's papers together with every paper citing them. Tried on
    Works the clustering left out take as main topic the one they link to most (`inferred`).
 5. **Description** (`describe`): per topic, its distinctive terms (shares in the topic against the rest of the
    list), journals, categories, keywords, countries, years, linked topics and most cited works.
-6. **Names**: written by Claude from the description (skill `topic-namer`), never by the package. `compare`
+6. **Network of works** (`board`, `export --works`, up to `--network-max` works, 10,000 by default): each topic
+   is a disc with area proportional to its works, placed by the links between topics and pushed apart until none
+   overlap; inside it, the topic's works are placed by the links among them (Fruchterman-Reingold, igraph).
+7. **Names**: written by Claude from the description (skill `topic-namer`), never by the package. `compare`
    carries names over from an earlier run: a topic sharing 60% of its works both ways with an earlier one keeps
    its name.
 
@@ -178,8 +194,9 @@ journals, categories and countries took 10 minutes and 4.4 GB.
 | `meta.json` | parameters, versions, input MD5, network counts, optional fields present, quality |
 | `dossier.json` | description of each topic and area (`describe`) |
 | `topics_vosviewer.json`, `topics_map.txt`, `topics_network.txt` | graph of topics for VOSviewer (`export`) |
+| `works_vosviewer.json` | network of works for VOSviewer: one item per work with a link, cluster = its topic, the board's positions (`export --works`) |
 | `topics.csv`, `works_topics.csv.gz` | the same as tables (`export`) |
-| `board.html` | self-contained board: Overview always, then Timeline, Works, highlight, Countries and Authors as the fields allow, and About (`board`) |
+| `board.html` | self-contained board: Overview always, then Timeline, Works, Network (up to 10,000 works), highlight, Countries and Authors as the fields allow, and About (`board`) |
 | `network.npz`, `clusters.npz` | arrays reused by the other commands |
 
 ## Claude skills
@@ -201,6 +218,10 @@ python -m pip install -e ".[dev]"
 python -m pytest
 ruff check . && ruff format --check .
 ```
+
+The site (`docs/`: the method page, the home page and the sample board with its VOSviewer files) is copied to
+the `gh-pages` branch, served at <https://restrepo.github.io/citation-topics/>, by `.github/workflows/pages.yml` on
+every merge to `main` that changes it.
 
 Releases are published to PyPI from GitHub Actions when a `v*` tag is pushed; see [PUBLISHING.md](PUBLISHING.md)
 and [CHANGELOG.md](CHANGELOG.md).

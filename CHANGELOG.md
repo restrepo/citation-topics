@@ -4,6 +4,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Added
+- `board`: a Network tab when the list has at most `--network-max` works (10,000): every work with a citation
+  link, each topic its own cluster labelled with its name, coloured by area; zoom, hover and topic focus.
+  `--vosviewer-url` links it to VOSviewer Online.
+- `export --works INPUT`: `works_vosviewer.json`, the network of works for VOSviewer with the board's positions and
+  one named cluster per topic.
+- Site on GitHub Pages (`docs/`, published by the `pages.yml` workflow on every merge to main): how the topics are
+  made, and the sample board of the INSPIRE-HEP author 991924 with its VOSviewer files.
+
 ## [0.2.0] - 2026-11-15
 
 ### Added

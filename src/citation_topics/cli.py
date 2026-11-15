@@ -88,6 +88,18 @@ def cmd_export(a):
         a.vosviewer = a.csv = True
     if a.vosviewer:
         export_vosviewer(a.out, min_links=a.min_links, log=_log(a.quiet))
+        if a.works:
+            from .export import export_works_vosviewer
+
+            export_works_vosviewer(
+                a.works,
+                a.out,
+                _fields(a),
+                highlight=a.highlight,
+                highlight_label=a.highlight_label,
+                network_max=a.network_max,
+                log=_log(a.quiet),
+            )
     if a.csv:
         export_csv(a.out, log=_log(a.quiet))
 
@@ -104,6 +116,8 @@ def cmd_board(a):
         highlight_label=a.highlight_label,
         title=a.title,
         max_works=a.max_works,
+        network_max=a.network_max,
+        vosviewer_url=a.vosviewer_url,
         log=_log(a.quiet),
     )
 
@@ -170,6 +184,15 @@ def main(argv=None):
     p.add_argument("--vosviewer", action="store_true")
     p.add_argument("--csv", action="store_true")
     p.add_argument("--min-links", type=int, default=1, help="VOSviewer: drop links between topics weaker than this")
+    p.add_argument(
+        "--works",
+        metavar="INPUT",
+        help="the input file of `run`: also write works_vosviewer.json, the network of works clustered by topic",
+    )
+    _input_args(p)
+    p.add_argument("--highlight", metavar="FIELD", help="works_vosviewer.json: true/false field named in descriptions")
+    p.add_argument("--highlight-label", help="how to name those works (default: the field)")
+    p.add_argument("--network-max", type=int, default=10000, help="works_vosviewer.json: most works (default 10000)")
     p.add_argument("-q", "--quiet", action="store_true")
     p.set_defaults(func=cmd_export)
 
@@ -182,6 +205,18 @@ def main(argv=None):
     p.add_argument("--highlight", metavar="FIELD", help="true/false input field marking works to follow, e.g. own")
     p.add_argument("--highlight-label", default="Highlighted works", help="name of that tab (e.g. 'Your papers')")
     p.add_argument("--max-works", type=int, default=5000, help="most cited works kept for the Works tab (default 5000)")
+    p.add_argument(
+        "--network-max",
+        type=int,
+        default=10000,
+        help="draw the Network tab (every work, clustered by topic) when there are at most this many works (default "
+        "10000; 0 turns it off)",
+    )
+    p.add_argument(
+        "--vosviewer-url",
+        metavar="URL",
+        help="public URL of works_vosviewer.json (`export --works`): the Network tab links to it in VOSviewer Online",
+    )
     p.add_argument("-q", "--quiet", action="store_true")
     p.set_defaults(func=cmd_board)
 
