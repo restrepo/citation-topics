@@ -4,6 +4,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-11-16
+
+### Added
+- README: the OpenAlex example, `examples/openalex_profile.py` (an OpenAlex author's works and every work citing
+  them), and its sample board for the author A5010397600.
+
 ## [0.3.0] - 2026-11-15
 
 ### Added
@@ -45,7 +51,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - `names`, `compare` (fates and names carried over), `agreement` (NMI/ARI, medoid), `export` (VOSviewer, CSV).
 - Claude skills `topics-run`, `topic-namer`, `topics-compare` and the agent `topic-namer` (`skills install`).
 
-[Unreleased]: https://github.com/restrepo/citation-topics/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/restrepo/citation-topics/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/restrepo/citation-topics/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/restrepo/citation-topics/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/restrepo/citation-topics/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/restrepo/citation-topics/releases/tag/v0.1.0

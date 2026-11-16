@@ -16,6 +16,8 @@ million INSPIRE-HEP papers into 304 topics and 6 areas.
 - [Sample board](https://restrepo.github.io/citation-topics/examples/inspire-991924/): the citation community of
   the INSPIRE-HEP author 991924, and the same network of works
   [in VOSviewer Online](https://app.vosviewer.com/?json=https%3A%2F%2Frestrepo.github.io%2Fcitation-topics%2Fexamples%2Finspire-991924%2Fworks_vosviewer.json).
+- [OpenAlex sample board](https://restrepo.github.io/citation-topics/examples/openalex-A5010397600/): the same for
+  the OpenAlex author A5010397600, in marine ecology.
 
 ## Install
 
@@ -155,6 +157,18 @@ areas, in about a minute; the result is the [sample board](https://restrepo.gith
    ```text
    https://app.vosviewer.com/?json=https%3A%2F%2Frestrepo.github.io%2Fcitation-topics%2Fexamples%2Finspire-991924%2Fworks_vosviewer.json
    ```
+
+**From an OpenAlex profile.** `examples/openalex_profile.py` does step 2 for any field: given an OpenAlex author id
+or ORCID, it writes the author's works and every work citing them, with OpenAlex fields and subfields as
+categories (standard library only; it uses `OPENALEX_API_KEY` when set, and works without it). Tried on the author
+[A5010397600](https://openalex.org/A5010397600) (marine and coral-reef ecology): 90 works and 2,136 citing works,
+12 topics in 6 areas at resolution 1; the result is the
+[OpenAlex sample board](https://restrepo.github.io/citation-topics/examples/openalex-A5010397600/).
+
+```bash
+curl -O https://raw.githubusercontent.com/restrepo/citation-topics/main/examples/openalex_profile.py
+python openalex_profile.py A5010397600 works.jsonl
+```
 
 ## Method
 
