@@ -2,6 +2,7 @@
 #   docs/index.html                   -> index.html           (home)
 #   docs/leiden.html                  -> leiden.html          (how the topics are made)
 #   docs/examples/inspire-991924/     -> examples/inspire-991924/  (sample board and its VOSviewer files)
+#   docs/examples/openalex-A5010397600/ -> examples/openalex-A5010397600/  (OpenAlex sample board and its files)
 # gh-pages is a mirror of docs/: files removed from docs/ are removed from the site. Nothing is built, downloaded
 # or released here; the sample is rebuilt by hand with the commands in docs/index.html.
 name: Pages

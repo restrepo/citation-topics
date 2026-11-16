@@ -35,6 +35,8 @@ to explore them, and Claude skills that name them.</p>
   <a class="card" href="leiden.html"><b>How the topics are made</b><span>The Leiden algorithm explained step by step, and what the package does exactly.</span></a>
   <a class="card" href="examples/inspire-991924/"><b>Sample board</b><span>The citation community of INSPIRE-HEP author 991924: 1,967 works in 11 topics.</span></a>
   <a class="card" href="https://app.vosviewer.com/?json=https%3A%2F%2Frestrepo.github.io%2Fcitation-topics%2Fexamples%2Finspire-991924%2Fworks_vosviewer.json"><b>Sample in VOSviewer Online</b><span>The same network of works, one cluster per topic.</span></a>
+  <a class="card" href="examples/openalex-A5010397600/"><b>OpenAlex sample board</b><span>The citation community of OpenAlex author A5010397600 (marine ecology): 2,226 works in 12 topics.</span></a>
+  <a class="card" href="https://app.vosviewer.com/?json=https%3A%2F%2Frestrepo.github.io%2Fcitation-topics%2Fexamples%2Fopenalex-A5010397600%2Fworks_vosviewer.json"><b>OpenAlex sample in VOSviewer Online</b><span>The same network of works, one cluster per topic.</span></a>
 </div>
 
 <h2>The sample</h2>
@@ -55,6 +57,27 @@ citation-topics board works.jsonl out/ --highlight own --highlight-label "The au
 <a href="examples/inspire-991924/topics_vosviewer.json">topics_vosviewer.json</a> (topics), for
 <a href="https://app.vosviewer.com/">VOSviewer Online</a> or VOSviewer. A new download from INSPIRE-HEP gives
 slightly different numbers as new citing papers appear.</p>
+
+<h2>The OpenAlex sample</h2>
+<p>The same path for any field, from an <a href="https://openalex.org/">OpenAlex</a> author profile: the works of the
+author <a href="https://openalex.org/A5010397600">A5010397600</a> (marine and coral-reef ecology) together with every
+work citing them, downloaded on 2026-11-16: 90 works of the author and 2,136 citing works, with 8,295 citation links
+among them, in 12 topics and 6 areas (resolution 1; seed 4 is the medoid of seeds 1 to 4, topic NMI 0.84). The
+smallest area holds the taxonomy papers that cite the author's Catalogue of Life. Made with:</p>
+<pre>python openalex_profile.py A5010397600 works.jsonl   # examples/openalex_profile.py in the repository
+citation-topics run works.jsonl out/ --resolution 1 --min-size 20 --seed 4
+citation-topics describe works.jsonl out/ --abstracts
+citation-topics names out/ names.json
+citation-topics export out/ --works works.jsonl --highlight own --highlight-label "The author's works"
+citation-topics board works.jsonl out/ --highlight own --highlight-label "The author's works" \
+    --title "OpenAlex author A5010397600: citation topics" \
+    --vosviewer-url https://restrepo.github.io/citation-topics/examples/openalex-A5010397600/works_vosviewer.json</pre>
+<p>The script takes an OpenAlex author id or an ORCID and needs only the Python standard library; it works without an
+API key (set <code>OPENALEX_API_KEY</code> to use yours). Each work carries its OpenAlex field and subfield as
+categories, its authors' countries and its DOI as link. The files:
+<a href="examples/openalex-A5010397600/names.json">names.json</a>,
+<a href="examples/openalex-A5010397600/works_vosviewer.json">works_vosviewer.json</a> and
+<a href="examples/openalex-A5010397600/topics_vosviewer.json">topics_vosviewer.json</a>.</p>
 
 <h2>Get it</h2>
 <pre>pip install citation-topics

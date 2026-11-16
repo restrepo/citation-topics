@@ -1,0 +1,83 @@
+{
+ "topics": {
+  "0": {
+   "name": "Caribbean marine biodiversity and species records",
+   "reason": "terms caribbean, antilles, amphipoda, records; 'Census of Marine Biodiversity', 'Magnitude of Global Marine Species Diversity'"
+  },
+  "1": {
+   "name": "Biodiversity, ecosystem functioning and reef fisheries",
+   "reason": "terms biodiversity-ecosystem functioning, fish biomass, ecosystem services; 'Biodiversity loss and its impact on humanity', marine protected areas"
+  },
+  "2": {
+   "name": "Coral bleaching and reef restoration in the Eastern Pacific",
+   "reason": "terms pocillopora, coral nurseries, coral bleaching, restoration; keyword eastern tropical pacific"
+  },
+  "3": {
+   "name": "Reef fish functional diversity and oceanic islands",
+   "reason": "terms reef fish, oceanic islands, functional diversity, assemblages; 'Rare Species Support Vulnerable Functions'"
+  },
+  "4": {
+   "name": "The mid-domain effect and elevational richness gradients",
+   "reason": "terms mid-domain effect, elevation gradient, geometric constraints; null models, bird elevational diversity"
+  },
+  "5": {
+   "name": "Gorgona Island and the Colombian Pacific coast",
+   "reason": "terms gorgona, colombian pacific, cetengraulis mysticetus, ENSO; 'Corals and coral reefs of the Pacific coast of Colombia'"
+  },
+  "6": {
+   "name": "Larval dispersal and snapper populations",
+   "reason": "terms pelagic larval duration, lutjanus, snapper, dispersal; population structure, range size"
+  },
+  "7": {
+   "name": "Turbid and urban reefs of Cartagena Bay",
+   "reason": "terms cartagena bay, varadero reef, orbicella faveolata, turbidity, canal del dique"
+  },
+  "8": {
+   "name": "Cryptobenthic fishes and eDNA surveys",
+   "reason": "terms edna metabarcoding, cryptobenthic fishes, environmental DNA, gobiidae"
+  },
+  "9": {
+   "name": "Rove-beetle taxonomy citing the Catalogue of Life",
+   "reason": "terms staphylinidae, coleoptera, new species, identification key; cites the profile's 'Catalogue of Life' (2022)"
+  },
+  "10": {
+   "name": "Age and growth of rays and skates",
+   "reason": "terms vertebral centra, von bertalanffy growth, whipray, urotrygon; elasmobranch life history"
+  },
+  "11": {
+   "name": "Cleaning symbioses on coral reefs",
+   "reason": "terms cleaner shrimp, cleaner fish, cleaning symbiosis, mutualism, elacatinus"
+  }
+ },
+ "areas": {
+  "0": {
+   "name": "Reef fish ecology and biodiversity–ecosystem function",
+   "reason": "topics 1, 3, 6, 8, 11; terms fish biomass, functional diversity, larval dispersal"
+  },
+  "1": {
+   "name": "Corals of the Colombian and Eastern Tropical Pacific reefs",
+   "reason": "topics 2, 5, 7; terms coral bleaching, gorgona, cartagena bay"
+  },
+  "2": {
+   "name": "Marine biodiversity census and Caribbean records",
+   "reason": "topic 0 only; terms caribbean, species records, marine biodiversity"
+  },
+  "3": {
+   "name": "Species richness gradients",
+   "reason": "topic 4 only; terms mid-domain effect, elevation gradient"
+  },
+  "4": {
+   "name": "Insect taxonomy",
+   "reason": "topic 9 only; terms staphylinidae, coleoptera, new species"
+  },
+  "5": {
+   "name": "Elasmobranch life history",
+   "reason": "topic 10 only; terms age estimation, rays, growth"
+  }
+ },
+ "meta": {
+  "by": "topic-namer skill (Claude in Claude Code)",
+  "model": "claude-opus-5-5",
+  "date": "2026-11-16"
+ }
+}
