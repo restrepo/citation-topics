@@ -4,6 +4,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-15
+
 ### Added
 - `board`: a Network tab when the list has at most `--network-max` works (10,000): every work with a citation
   link, each topic its own cluster labelled with its name, coloured by area; zoom, hover and topic focus.
@@ -20,6 +22,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - `examples/inspire_profile.py` also writes `authors` (the first 10), `author_count` and `collaborations`.
 - Site on GitHub Pages (`docs/`, published by the `pages.yml` workflow on every merge to main): how the topics are
   made, and the sample board of the INSPIRE-HEP author 991924 with its VOSviewer files.
+
+### Changed
+- README: the INSPIRE-HEP example names the profile by its number (991924) only.
 
 ## [0.2.0] - 2026-11-15
 
@@ -40,6 +45,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - `names`, `compare` (fates and names carried over), `agreement` (NMI/ARI, medoid), `export` (VOSviewer, CSV).
 - Claude skills `topics-run`, `topic-namer`, `topics-compare` and the agent `topic-namer` (`skills install`).
 
-[Unreleased]: https://github.com/restrepo/citation-topics/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/restrepo/citation-topics/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/restrepo/citation-topics/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/restrepo/citation-topics/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/restrepo/citation-topics/releases/tag/v0.1.0
