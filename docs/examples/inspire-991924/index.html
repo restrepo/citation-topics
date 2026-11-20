@@ -175,6 +175,55 @@ footer { color: var(--muted); font-size: 12px; }
     </div>
   </section>
 
+<!-- full-inspire-tab -->
+  <section class="panel" id="p-full" role="tabpanel" hidden>
+    <div class="sec">
+      <h2>The topics of this community in the full INSPIRE-HEP map</h2>
+      <p class="note">The full map is the clustering of the whole INSPIRE-HEP citation network made with this package in <a href="https://github.com/restrepo/inspireauth10">restrepo/inspireauth10</a>: 1,872,221 papers, 304 topics in 6 areas (resolution 16, seed 1). It is the same method at another scale, so a topic of this board can be a piece of a full topic, match it, or spread over several.</p>
+      <p>Of the 1,964 works with a topic here, <b>1,943</b> (99%) have a topic in the full map; they fall in <b>84</b> of its 304 topics. Agreement between the two partitions: NMI <b>0.45</b>, ARI <b>0.30</b>, moderate, as expected between a fine local split and a coarse global one.</p>
+      <ul class="note" style="max-width:none;color:var(--fg);font-size:14px">
+        <li><b>Strong matches.</b> R-parity violation, the DUNE experiments, singlet-doublet dark matter and the Z&prime; models each sit mostly (49% to 67%) in one full topic; the author's 19 R-parity papers all fall in the full topic of R-parity violation and leptoquarks.</li>
+        <li><b>Merged in the full map.</b> The full topic of neutrino mass models and lepton flavour violation is the largest piece of this community: it holds most of three topics here (scotogenic, seesaw and Dirac neutrino masses), which the local clustering separates.</li>
+        <li><b>Spread out.</b> Supersymmetry at the LHC and ILC spreads over supersymmetric model building, supersymmetry at colliders and composite Higgs; gravitino dark matter sits between R-parity violation and cosmic-ray positrons (in the astrophysics area); the diboson-excess topic splits between neutrino mass models and diphoton resonances.</li>
+        <li><b>A name to read with care.</b> The topic of LHC searches with lepton universality sits mostly in the full topic of B physics at LHCb and Belle II: its works are mainly about the lepton-universality anomalies.</li>
+        <li><b>Areas.</b> All the areas of this board are inside one full area, Particle physics: experiment, phenomenology, QCD and hadrons, which holds 73 of the author's 76 papers with a full topic.</li>
+      </ul>
+    </div>
+    <div class="sec">
+      <h2>Each topic of this board in the full map</h2>
+      <p class="note">The three full topics holding most of its works, with their share, and where the author's own papers fall.</p>
+      <div class="tw"><table><thead><tr><th>Topic here</th><th class="n">Works</th><th>Main full topics</th><th>Author's papers</th></tr></thead><tbody>
+        <tr><td>R-parity violating supersymmetry and neutrino masses</td><td class="n">430</td><td>53% #256 R-parity violation and leptoquarks <span style="color:var(--muted)">(Particle physics)</span><br>9% #123 Supersymmetry at colliders <span style="color:var(--muted)">(Particle physics)</span><br>7% #74 Neutrino mass models and lepton flavour violation <span style="color:var(--muted)">(Particle physics)</span></td><td class="s">#256 &times; 19, #116 &times; 2</td></tr>
+        <tr><td>Scotogenic and radiative neutrino mass models</td><td class="n">293</td><td>67% #74 Neutrino mass models and lepton flavour violation <span style="color:var(--muted)">(Particle physics)</span><br>7% #251 Baryogenesis and leptogenesis <span style="color:var(--muted)">(Particle physics)</span><br>5% #157 Particle dark matter candidates and relic abundance <span style="color:var(--muted)">(Particle physics)</span></td><td class="s">#74 &times; 10, #48 &times; 1</td></tr>
+        <tr><td>DUNE and liquid-argon neutrino experiments</td><td class="n">269</td><td>49% #81 Long-baseline neutrino experiments <span style="color:var(--muted)">(Particle physics)</span><br>14% #227 Coherent elastic neutrino-nucleus scattering <span style="color:var(--muted)">(Particle physics)</span><br>7% #31 Dark matter evidence and direct detection <span style="color:var(--muted)">(Particle physics)</span></td><td class="s">#81 &times; 8, #227 &times; 1</td></tr>
+        <tr><td>Supersymmetry and new physics at the LHC and ILC</td><td class="n">225</td><td>15% #168 Supersymmetric model building <span style="color:var(--muted)">(Particle physics)</span><br>12% #123 Supersymmetry at colliders <span style="color:var(--muted)">(Particle physics)</span><br>11% #238 Composite Higgs <span style="color:var(--muted)">(Particle physics)</span></td><td class="s">#109 &times; 1, #64 &times; 1, #6 &times; 1</td></tr>
+        <tr><td>Seesaw models: Higgs triplets, majorons and sterile neutrinos</td><td class="n">145</td><td>48% #74 Neutrino mass models and lepton flavour violation <span style="color:var(--muted)">(Particle physics)</span><br>11% #245 Sterile neutrinos and neutrino cosmology <span style="color:var(--muted)">(Particle physics)</span><br>6% #116 Quark and lepton mass matrices and flavour symmetries <span style="color:var(--muted)">(Particle physics)</span></td><td class="s">#74 &times; 2</td></tr>
+        <tr><td>Singlet-doublet and scalar dark matter: relic density and detection</td><td class="n">124</td><td>64% #157 Particle dark matter candidates and relic abundance <span style="color:var(--muted)">(Particle physics)</span><br>8% #217 Electroweak baryogenesis and sphalerons <span style="color:var(--muted)">(Particle physics)</span><br>5% #251 Baryogenesis and leptogenesis <span style="color:var(--muted)">(Particle physics)</span></td><td class="s">#157 &times; 2, #74 &times; 1</td></tr>
+        <tr><td>Extra gauge symmetries: 3-3-1 and Z&#x27; models and muon g-2</td><td class="n">122</td><td>61% #253 Z&#x27; bosons and E6 models <span style="color:var(--muted)">(Particle physics)</span><br>8% #157 Particle dark matter candidates and relic abundance <span style="color:var(--muted)">(Particle physics)</span><br>6% #74 Neutrino mass models and lepton flavour violation <span style="color:var(--muted)">(Particle physics)</span></td><td class="s">#253 &times; 2, #74 &times; 1, #101 &times; 1, #229 &times; 1</td></tr>
+        <tr><td>Dirac neutrino masses and N_eff</td><td class="n">104</td><td>62% #74 Neutrino mass models and lepton flavour violation <span style="color:var(--muted)">(Particle physics)</span><br>13% #87 Axions and the strong CP problem <span style="color:var(--muted)">(Particle physics)</span><br>7% #116 Quark and lepton mass matrices and flavour symmetries <span style="color:var(--muted)">(Particle physics)</span></td><td class="s">#74 &times; 7, #157 &times; 2, #217 &times; 1, #87 &times; 1</td></tr>
+        <tr><td>LHC searches: vector-boson fusion, Higgs portal and lepton universality</td><td class="n">96</td><td>47% #101 B physics at LHCb and Belle II <span style="color:var(--muted)">(Particle physics)</span><br>15% #229 Two-Higgs-doublet models <span style="color:var(--muted)">(Particle physics)</span><br>9% #6 LHC experiments and the Higgs discovery <span style="color:var(--muted)">(Particle physics)</span></td><td class="s">#297 &times; 1, #253 &times; 1, #101 &times; 1, #229 &times; 1</td></tr>
+        <tr><td>Decaying gravitino dark matter and cosmic rays</td><td class="n">87</td><td>28% #256 R-parity violation and leptoquarks <span style="color:var(--muted)">(Particle physics)</span><br>24% #61 Cosmic-ray positrons and antimatter <span style="color:var(--muted)">(Astrophysics and gravitational waves)</span><br>17% #157 Particle dark matter candidates and relic abundance <span style="color:var(--muted)">(Particle physics)</span></td><td class="s">#61 &times; 2, #256 &times; 1</td></tr>
+        <tr><td>LHC diboson excess, SO(10) and left-right models</td><td class="n">48</td><td>35% #74 Neutrino mass models and lepton flavour violation <span style="color:var(--muted)">(Particle physics)</span><br>35% #287 Landau-Yang theorem and diphoton resonances <span style="color:var(--muted)">(Particle physics)</span><br>6% #157 Particle dark matter candidates and relic abundance <span style="color:var(--muted)">(Particle physics)</span></td><td class="s">#74 &times; 2, #287 &times; 1</td></tr>
+      </tbody></table></div>
+    </div>
+    <div class="sec">
+      <h2>The full topics holding most of this community</h2>
+      <div class="tw"><table><thead><tr><th>Full topic</th><th class="n">Works here</th><th>From the topics here</th></tr></thead><tbody>
+        <tr><td>#74 Neutrino mass models and lepton flavour violation</td><td class="n">401</td><td class="s">Scotogenic and radiative neutrino mass models (195)<br>Seesaw models: Higgs triplets, majorons and sterile neutrinos (70)<br>Dirac neutrino masses and N_eff (65)</td></tr>
+        <tr><td>#256 R-parity violation and leptoquarks</td><td class="n">255</td><td class="s">R-parity violating supersymmetry and neutrino masses (230)<br>Decaying gravitino dark matter and cosmic rays (24)<br>Extra gauge symmetries: 3-3-1 and Z&#x27; models and muon g-2 (1)</td></tr>
+        <tr><td>#157 Particle dark matter candidates and relic abundance</td><td class="n">140</td><td class="s">Singlet-doublet and scalar dark matter: relic density and detection (79)<br>Decaying gravitino dark matter and cosmic rays (15)<br>Scotogenic and radiative neutrino mass models (14)</td></tr>
+        <tr><td>#81 Long-baseline neutrino experiments</td><td class="n">134</td><td class="s">DUNE and liquid-argon neutrino experiments (132)<br>Seesaw models: Higgs triplets, majorons and sterile neutrinos (1)<br>Supersymmetry and new physics at the LHC and ILC (1)</td></tr>
+        <tr><td>#253 Z&#x27; bosons and E6 models</td><td class="n">93</td><td class="s">Extra gauge symmetries: 3-3-1 and Z&#x27; models and muon g-2 (75)<br>Supersymmetry and new physics at the LHC and ILC (8)<br>Seesaw models: Higgs triplets, majorons and sterile neutrinos (3)</td></tr>
+        <tr><td>#123 Supersymmetry at colliders</td><td class="n">82</td><td class="s">R-parity violating supersymmetry and neutrino masses (40)<br>Supersymmetry and new physics at the LHC and ILC (27)<br>LHC searches: vector-boson fusion, Higgs portal and lepton universality (6)</td></tr>
+        <tr><td>#101 B physics at LHCb and Belle II</td><td class="n">59</td><td class="s">LHC searches: vector-boson fusion, Higgs portal and lepton universality (45)<br>Extra gauge symmetries: 3-3-1 and Z&#x27; models and muon g-2 (4)<br>Scotogenic and radiative neutrino mass models (3)</td></tr>
+        <tr><td>#116 Quark and lepton mass matrices and flavour symmetries</td><td class="n">57</td><td class="s">R-parity violating supersymmetry and neutrino masses (22)<br>Seesaw models: Higgs triplets, majorons and sterile neutrinos (9)<br>Scotogenic and radiative neutrino mass models (7)</td></tr>
+        <tr><td>#229 Two-Higgs-doublet models</td><td class="n">52</td><td class="s">LHC searches: vector-boson fusion, Higgs portal and lepton universality (14)<br>Scotogenic and radiative neutrino mass models (12)<br>Extra gauge symmetries: 3-3-1 and Z&#x27; models and muon g-2 (6)</td></tr>
+        <tr><td>#168 Supersymmetric model building</td><td class="n">44</td><td class="s">Supersymmetry and new physics at the LHC and ILC (33)<br>R-parity violating supersymmetry and neutrino masses (11)</td></tr>
+      </tbody></table></div>
+      <p class="note">The author's papers by full area: Particle physics: experiment, phenomenology, QCD and hadrons: 73; Astrophysics and gravitational waves: 2; Theory: strings, fields, gravity and cosmology: 1. Citing papers added to INSPIRE after the full download have no full topic. Made with examples/full_inspire_tab.py.</p>
+    </div>
+  </section>
+<!-- /full-inspire-tab -->
   <section class="panel" id="p-about" role="tabpanel" hidden>
     <div class="sec">
       <h2>How this board was made</h2>
@@ -575,5 +624,16 @@ addEventListener('resize', () => { clearTimeout(rw); rw = setTimeout(() => {
   if (current === 'overview') drawMap(); else if (current === 'network') drawNetwork(); else if (['timeline', 'countries'].includes(current)) DRAW[current]();
 }, 200); });
 </script>
+<!-- full-inspire-tab -->
+<script>
+TABS.full = 'Full INSPIRE';
+DRAW.full = () => {};
+{ const b = el('button', {role: 'tab', 'data-tab': 'full', 'aria-selected': 'false'}, TABS.full);
+  b.onclick = () => open('full');
+  nav.insertBefore(b, nav.querySelector('[data-tab="about"]'));
+  const nav0 = (performance.getEntriesByType('navigation')[0] || {}).name || '';
+  if (nav0.endsWith('#full')) open('full'); }
+</script>
+<!-- /full-inspire-tab -->
 </body>
 </html>
