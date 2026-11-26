@@ -85,7 +85,33 @@ if __name__ == '__main__':
     main()
 ```
 
-Run the Flight and poll its run status and logs until terminal. Check exit code, expected 80 experiment rows and graph invariants. Record package versions, snapshot, parameters, run ID and input hash. This example is raw RB Leiden, not the package's complete clustering pipeline; the multi-seed adaptation has not been executed here.
+Run the Flight and poll its run status and logs until terminal. Check exit code, expected 80 experiment rows and graph invariants. Record package versions, snapshot, parameters, run ID and input hash. This example is raw RB Leiden, not the package's complete clustering pipeline; the multi-seed example was execution-tested on MotherDuck Flights on 2026-11-26.
+
+### Regression validation (INSPIRE-HEP)
+
+The published Python example was run with the database name configured for an INSPIRE-HEP snapshot dated 2026-11-09 (1,872,221 papers), seed record 709378 and precursor record 416719. CPython 3.12.16 and the three pinned dependencies above were used. All 80 unique parameter combinations completed in approximately 131 seconds with exit code 0. Graph sizes were invariant across seeds and resolutions, and all modularity and objective values were finite.
+
+| Minimum support | Nodes | Directed edges | Simple undirected edges |
+|---:|---:|---:|---:|
+| 5 | 7999 | 278311 | 277422 |
+| 10 | 4253 | 137635 | 137267 |
+| 20 | 2601 | 76370 | 76241 |
+| 50 | 1988 | 49644 | 49570 |
+
+At support 10, resolution 1 and random seed 42, the run reproduced 9 communities and standard modularity 0.4262695196947297; the seed and precursor were in different communities.
+
+Number of seeds (out of five) placing the two papers in the same community:
+
+| Minimum support | Resolution 0.5 | Resolution 1 | Resolution 1.5 | Resolution 2 |
+|---:|---:|---:|---:|---:|
+| 5 | 5 | 5 | 4 | 1 |
+| 10 | 5 | 3 | 5 | 2 |
+| 20 | 5 | 3 | 0 | 0 |
+| 50 | 4 | 3 | 0 | 0 |
+
+Overall, 45 of 80 configurations placed the papers together (56.25%). This is a descriptive sensitivity statistic, not a probability of scientific equivalence or a prospective discovery test.
+
+The validation used read-only source queries, with no scheduled execution or persistent database writes. Exact results depend on the snapshot and software versions. The input hash was not captured, and the private source snapshot and execution logs are not distributed. This test does not validate the complete citation-topics CLI pipeline, interactive board generation, or ARI/NMI partition stability.
 
 ## Full package workflow
 
