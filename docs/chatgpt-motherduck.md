@@ -47,9 +47,9 @@ def main():
     db = DATABASE
     seed = int(SEED_ID)
     precursor = int(PRECURSOR_ID)
-    con = duckdb.connect(f'md:{db}?attach_mode=single')
+    con = duckdb.connect(f"md:{db}?attach_mode=single")
     for k in (5, 10, 20, 50):
-        base = f'''WITH s AS (
+        base = f"""WITH s AS (
             SELECT recid, "references" FROM papers
             WHERE recid={seed} OR list_contains(
                 list_transform("references", r->r.recid), {seed})
@@ -58,34 +58,50 @@ def main():
             SELECT r.recid FROM s, unnest(s."references") u(r)
             WHERE r.in_corpus GROUP BY r.recid
             HAVING count(DISTINCT s.recid)>={k}
-        )'''
-        ids = [r[0] for r in con.execute(
-            base + ' SELECT recid FROM n ORDER BY recid').fetchall()]
-        edges = con.execute(base + ''' SELECT DISTINCT p.recid,r.recid
+        )"""
+        ids = [r[0] for r in con.execute(base + " SELECT recid FROM n ORDER BY recid").fetchall()]
+        edges = con.execute(
+            base
+            + """ SELECT DISTINCT p.recid,r.recid
             FROM papers p JOIN n ON n.recid=p.recid,
             unnest(p."references") u(r) JOIN n n2 ON n2.recid=r.recid
-            WHERE p.recid<>r.recid ORDER BY 1,2''').fetchall()
-        idx = {v:i for i,v in enumerate(ids)}
+            WHERE p.recid<>r.recid ORDER BY 1,2"""
+        ).fetchall()
+        idx = {v: i for i, v in enumerate(ids)}
         assert seed in idx
-        g = ig.Graph(n=len(ids), edges=[(idx[a],idx[b]) for a,b in edges])
+        g = ig.Graph(n=len(ids), edges=[(idx[a], idx[b]) for a, b in edges])
         g.simplify()
-        for resolution in (.5,1,1.5,2):
-            for random_seed in (1,2,3,4,42):
-                p = la.find_partition(g, la.RBConfigurationVertexPartition,
-                    resolution_parameter=resolution, seed=random_seed)
+        for resolution in (0.5, 1, 1.5, 2):
+            for random_seed in (1, 2, 3, 4, 42):
+                p = la.find_partition(
+                    g, la.RBConfigurationVertexPartition, resolution_parameter=resolution, seed=random_seed
+                )
                 m = p.membership[idx[seed]]
                 same = p.membership[idx[precursor]] == m if precursor in idx else None
-                print(dict(k=k,resolution=resolution,seed=random_seed,
-                    nodes=len(ids),directed_edges=len(edges),edges=g.ecount(),
-                    communities=len(p),modularity=g.modularity(p.membership),
-                    objective=p.quality(),same=same),flush=True)
+                print(
+                    dict(
+                        k=k,
+                        resolution=resolution,
+                        seed=random_seed,
+                        nodes=len(ids),
+                        directed_edges=len(edges),
+                        edges=g.ecount(),
+                        communities=len(p),
+                        modularity=g.modularity(p.membership),
+                        objective=p.quality(),
+                        same=same,
+                    ),
+                    flush=True,
+                )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
 ```
 
-Run the Flight and poll its run status and logs until terminal. Check exit code, expected 80 experiment rows and graph invariants. Record package versions, snapshot, parameters, run ID and input hash. This example is raw RB Leiden, not the package's complete clustering pipeline; the multi-seed adaptation has not been executed here.
+Run the Flight and poll its run status and logs until terminal. Check exit code, expected 80 experiment rows and graph invariants. Record package versions, snapshot, parameters, run ID and input hash. This example is raw RB Leiden, not the package's complete clustering pipeline; the multi-seed example was execution-tested on MotherDuck Flights on 2026-11-26.
+
+The example was execution-tested on MotherDuck Flights with all 80 parameter combinations completing successfully. Research-specific results belong in a separate research project, not in this package. The full CLI workflow below is distinct from the raw Leiden example.
 
 ## Full package workflow
 
