@@ -47,9 +47,9 @@ def main():
     db = DATABASE
     seed = int(SEED_ID)
     precursor = int(PRECURSOR_ID)
-    con = duckdb.connect(f'md:{db}?attach_mode=single')
+    con = duckdb.connect(f"md:{db}?attach_mode=single")
     for k in (5, 10, 20, 50):
-        base = f'''WITH s AS (
+        base = f"""WITH s AS (
             SELECT recid, "references" FROM papers
             WHERE recid={seed} OR list_contains(
                 list_transform("references", r->r.recid), {seed})
@@ -58,60 +58,50 @@ def main():
             SELECT r.recid FROM s, unnest(s."references") u(r)
             WHERE r.in_corpus GROUP BY r.recid
             HAVING count(DISTINCT s.recid)>={k}
-        )'''
-        ids = [r[0] for r in con.execute(
-            base + ' SELECT recid FROM n ORDER BY recid').fetchall()]
-        edges = con.execute(base + ''' SELECT DISTINCT p.recid,r.recid
+        )"""
+        ids = [r[0] for r in con.execute(base + " SELECT recid FROM n ORDER BY recid").fetchall()]
+        edges = con.execute(
+            base
+            + """ SELECT DISTINCT p.recid,r.recid
             FROM papers p JOIN n ON n.recid=p.recid,
             unnest(p."references") u(r) JOIN n n2 ON n2.recid=r.recid
-            WHERE p.recid<>r.recid ORDER BY 1,2''').fetchall()
-        idx = {v:i for i,v in enumerate(ids)}
+            WHERE p.recid<>r.recid ORDER BY 1,2"""
+        ).fetchall()
+        idx = {v: i for i, v in enumerate(ids)}
         assert seed in idx
-        g = ig.Graph(n=len(ids), edges=[(idx[a],idx[b]) for a,b in edges])
+        g = ig.Graph(n=len(ids), edges=[(idx[a], idx[b]) for a, b in edges])
         g.simplify()
-        for resolution in (.5,1,1.5,2):
-            for random_seed in (1,2,3,4,42):
-                p = la.find_partition(g, la.RBConfigurationVertexPartition,
-                    resolution_parameter=resolution, seed=random_seed)
+        for resolution in (0.5, 1, 1.5, 2):
+            for random_seed in (1, 2, 3, 4, 42):
+                p = la.find_partition(
+                    g, la.RBConfigurationVertexPartition, resolution_parameter=resolution, seed=random_seed
+                )
                 m = p.membership[idx[seed]]
                 same = p.membership[idx[precursor]] == m if precursor in idx else None
-                print(dict(k=k,resolution=resolution,seed=random_seed,
-                    nodes=len(ids),directed_edges=len(edges),edges=g.ecount(),
-                    communities=len(p),modularity=g.modularity(p.membership),
-                    objective=p.quality(),same=same),flush=True)
+                print(
+                    dict(
+                        k=k,
+                        resolution=resolution,
+                        seed=random_seed,
+                        nodes=len(ids),
+                        directed_edges=len(edges),
+                        edges=g.ecount(),
+                        communities=len(p),
+                        modularity=g.modularity(p.membership),
+                        objective=p.quality(),
+                        same=same,
+                    ),
+                    flush=True,
+                )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
 ```
 
 Run the Flight and poll its run status and logs until terminal. Check exit code, expected 80 experiment rows and graph invariants. Record package versions, snapshot, parameters, run ID and input hash. This example is raw RB Leiden, not the package's complete clustering pipeline; the multi-seed example was execution-tested on MotherDuck Flights on 2026-11-26.
 
-### Regression validation (INSPIRE-HEP)
-
-The published Python example was run with the database name configured for an INSPIRE-HEP snapshot dated 2026-11-09 (1,872,221 papers), seed record 709378 and precursor record 416719. CPython 3.12.16 and the three pinned dependencies above were used. All 80 unique parameter combinations completed in approximately 131 seconds with exit code 0. Graph sizes were invariant across seeds and resolutions, and all modularity and objective values were finite.
-
-| Minimum support | Nodes | Directed edges | Simple undirected edges |
-|---:|---:|---:|---:|
-| 5 | 7999 | 278311 | 277422 |
-| 10 | 4253 | 137635 | 137267 |
-| 20 | 2601 | 76370 | 76241 |
-| 50 | 1988 | 49644 | 49570 |
-
-At support 10, resolution 1 and random seed 42, the run reproduced 9 communities and standard modularity 0.4262695196947297; the seed and precursor were in different communities.
-
-Number of seeds (out of five) placing the two papers in the same community:
-
-| Minimum support | Resolution 0.5 | Resolution 1 | Resolution 1.5 | Resolution 2 |
-|---:|---:|---:|---:|---:|
-| 5 | 5 | 5 | 4 | 1 |
-| 10 | 5 | 3 | 5 | 2 |
-| 20 | 5 | 3 | 0 | 0 |
-| 50 | 4 | 3 | 0 | 0 |
-
-Overall, 45 of 80 configurations placed the papers together (56.25%). This is a descriptive sensitivity statistic, not a probability of scientific equivalence or a prospective discovery test.
-
-The validation used read-only source queries, with no scheduled execution or persistent database writes. Exact results depend on the snapshot and software versions. The input hash was not captured, and the private source snapshot and execution logs are not distributed. This test does not validate the complete citation-topics CLI pipeline, interactive board generation, or ARI/NMI partition stability.
+The example was execution-tested on MotherDuck Flights with all 80 parameter combinations completing successfully. Research-specific results belong in a separate research project, not in this package. The full CLI workflow below is distinct from the raw Leiden example.
 
 ## Full package workflow
 
