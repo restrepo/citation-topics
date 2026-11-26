@@ -219,6 +219,13 @@ journals, categories and countries took 10 minutes and 4.4 GB.
 | `board.html` | self-contained board: Overview always, then Timeline, Works, Network (up to 10,000 works), highlight, Countries and Authors as the fields allow, and About (`board`) |
 | `network.npz`, `clusters.npz` | arrays reused by the other commands |
 
+## AI-assisted workflows
+
+- **Claude Code (local-first):** prefer a local Python environment, the `citation-topics` CLI and the existing Claude skills described below.
+- **ChatGPT (remote-first):** see the [ChatGPT–MotherDuck workflow](docs/chatgpt-motherduck.md) for optional connected SQL and remote Python execution using MotherDuck Flights, without a local workstation.
+
+Both workflows share the same scientific methodology. MotherDuck Flights are optional and are not a package dependency.
+
 ## Claude skills
 
 `citation-topics skills install` copies into `./.claude` (or `~/.claude` with `--user`):
